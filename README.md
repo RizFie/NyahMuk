@@ -9,9 +9,9 @@ Proposed track: People, Community wellbeing (confirm before submission).
 
 | Role | Name | Works in |
 |---|---|---|
-| Frontend + integration | [name] | `frontend/` |
-| ML + backend | [name] | `backend/` |
-| Research, survey, pitch | [names] | `docs/` |
+| Frontend + integration | [HARIZ] | `frontend/` |
+| ML + backend | [AIMAN] | `backend/` |
+| Research, survey, pitch | [LOKMAN, HAFIZ] | `docs/` |
 
 ## Folder structure
 
