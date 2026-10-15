@@ -9,9 +9,9 @@ Proposed track: People, Community wellbeing (confirm before submission).
 
 | Role | Name | Works in |
 |---|---|---|
-| Frontend + integration | [HARIZ] | `frontend/` |
-| ML + backend | [AIMAN] | `backend/` |
-| Research, survey, pitch | [LOKMAN, HAFIZ] | `docs/` |
+| Frontend + integration | [name] | `frontend/` |
+| ML + backend | [name] | `backend/` |
+| Research, survey, pitch | [names] | `docs/` |
 
 ## Folder structure
 
@@ -115,7 +115,40 @@ Open http://localhost:3000.
 
 To use the real backend, set `NEXT_PUBLIC_API_BASE_URL=http://localhost:8000` in `frontend/.env.local`.
 
-Starter `backend/requirements.txt`: `fastapi`, `uvicorn[standard]`, `python-multipart`, `requests`, `shapely`, `pillow`. Add `scikit-learn`, `lightgbm`, `torch` and `transformers` only when needed.
+### `backend/requirements.txt`
+
+Start with this. Python 3.11 is a safe version to use for everything below.
+
+```
+# --- Core API (needed from day 1) ---
+fastapi
+uvicorn[standard]
+python-multipart      # lets the API accept photo uploads
+requests              # calls the Open-Meteo weather API
+pillow                # opens and saves report photos
+shapely               # finds which grid cell a GPS point is in
+
+# --- Risk scoring (add when you start make_risk_json.py) ---
+pandas
+numpy
+
+# --- Photo check (add when you start photo_check.py) ---
+# torch               # large download: install the CPU version on a laptop
+# transformers        # loads the CLIP model from Hugging Face
+# scikit-learn        # linear probe on CLIP embeddings
+
+# --- Only if training on dengue data (notebooks) ---
+# lightgbm
+# matplotlib
+# jupyter
+```
+
+Uncomment a section only when you need it, then run `pip install -r requirements.txt` again.
+
+Tips:
+- Once everything works on the ML engineer's machine, run `pip freeze > requirements.txt` to lock the exact versions, so it installs the same way for everyone and on the hosting service.
+- `torch` and `transformers` are big (several GB with the model). Free hosting tiers may not have enough memory to run them, so test early. If it doesn't fit, run the photo check on a host with more memory (Hugging Face Spaces has more on its free tier, as far as I know) or run the backend from a laptop for the demo.
+- `osmnx` (OpenStreetMap data) is deliberately left out because it pulls in many heavy dependencies. Run it once in a notebook, save the water-body and construction-site locations to `data/`, and let the API read the saved file.
 
 ## Build order
 
