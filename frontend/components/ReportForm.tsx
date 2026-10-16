@@ -1,0 +1,297 @@
+'use client';
+
+import React, { useState, useRef, useEffect } from 'react';
+import ReportMap from './ReportMap';
+import { submitReport } from '@/lib/api';
+import type { Report } from '@/lib/types';
+
+export default function ReportForm() {
+  const [photo, setPhoto] = useState<File | null>(null);
+  const [photoPreviewUrl, setPhotoPreviewUrl] = useState<string | null>(null);
+  const [gpsState, setGpsState] = useState<'idle' | 'loading' | 'success' | 'error' | 'manual'>('idle');
+  const [gpsCoords, setGpsCoords] = useState<{ lat: number; lng: number; accuracy?: number } | null>(null);
+  const [description, setDescription] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [submitResult, setSubmitResult] = useState<Report | null>(null);
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const successRef = useRef<HTMLDivElement>(null);
+
+  // Clean up object URL when component unmounts or photo changes
+  useEffect(() => {
+    return () => {
+      if (photoPreviewUrl) {
+        URL.revokeObjectURL(photoPreviewUrl);
+      }
+    };
+  }, [photoPreviewUrl]);
+
+  // Request GPS acquisition via navigator.geolocation
+  const requestGPS = () => {
+    if (typeof window === 'undefined' || !navigator.geolocation) {
+      setGpsState('error');
+      return;
+    }
+
+    setGpsState('loading');
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setGpsCoords({
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+          accuracy: position.coords.accuracy,
+        });
+        setGpsState('success');
+      },
+      (error) => {
+        console.warn('Geolocation acquisition error:', error);
+        setGpsState('error');
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 15000,
+        maximumAge: 0,
+      }
+    );
+  };
+
+  // Handle photo selection and auto-call requestGPS
+  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      alert('Please select an image file.');
+      return;
+    }
+
+    if (photoPreviewUrl) {
+      URL.revokeObjectURL(photoPreviewUrl);
+    }
+
+    setPhoto(file);
+    setPhotoPreviewUrl(URL.createObjectURL(file));
+    requestGPS();
+  };
+
+  // Handle map click fallback selection
+  const handleMapSelect = (lat: number, lng: number) => {
+    setGpsCoords({ lat, lng });
+    setGpsState('manual');
+  };
+
+  // Clear all form state
+  const handleClear = () => {
+    if (photoPreviewUrl) {
+      URL.revokeObjectURL(photoPreviewUrl);
+    }
+    setPhoto(null);
+    setPhotoPreviewUrl(null);
+    setGpsState('idle');
+    setGpsCoords(null);
+    setDescription('');
+    setSubmitting(false);
+    setSubmitted(false);
+    setSubmitResult(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  // Submit form data
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!photo || !gpsCoords || submitting) return;
+
+    setSubmitting(true);
+    try {
+      const formData = new FormData();
+      formData.append('photo', photo);
+      formData.append('lat', gpsCoords.lat.toString());
+      formData.append('lng', gpsCoords.lng.toString());
+      formData.append('note', description);
+
+      const result = await submitReport(formData);
+      setSubmitResult(result);
+      setSubmitted(true);
+      setTimeout(() => {
+        successRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }, 100);
+    } catch (err) {
+      console.error('Failed to submit report:', err);
+      alert('Failed to submit report. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  // Compute GPS box border colour
+  const borderColorClass =
+    gpsState === 'success' || gpsState === 'manual'
+      ? 'border-[#13845f]'
+      : gpsState === 'error'
+      ? 'border-[#d9951c]'
+      : 'border-[#2b4940]';
+
+  // Compute GPS status texts
+  let gpsStatusText = 'Waiting for photo capture';
+  let gpsSubText = 'Take a photo to automatically get your coordinates.';
+
+  if (gpsState === 'loading') {
+    gpsStatusText = 'Getting coordinates...';
+    gpsSubText = 'Please allow location access.';
+  } else if (gpsState === 'success' && gpsCoords) {
+    gpsStatusText = `${gpsCoords.lat.toFixed(6)}, ${gpsCoords.lng.toFixed(6)}`;
+    gpsSubText = `GPS accuracy: approximately ${
+      gpsCoords.accuracy ? Math.round(gpsCoords.accuracy) : 10
+    } m`;
+  } else if (gpsState === 'error') {
+    gpsStatusText = 'Unable to get GPS';
+    gpsSubText = 'Allow location access and try again, or tap the map below.';
+  } else if (gpsState === 'manual' && gpsCoords) {
+    gpsStatusText = `${gpsCoords.lat.toFixed(6)}, ${gpsCoords.lng.toFixed(6)}`;
+    gpsSubText = 'Location set from map';
+  }
+
+  return (
+    <form onSubmit={handleSubmit}>
+      {/* GPS location field */}
+      <div className="field flex flex-col gap-[7px] min-w-0 mb-4">
+        <label className="text-[#e7f5ef] text-xs font-bold">GPS location</label>
+        <div
+          className={`gpsbox flex items-center gap-[11px] p-[13px] border rounded-[11px] bg-[#1a332d] ${borderColorClass}`}
+        >
+          <span className="text-[20px] shrink-0">📍</span>
+          <div className="min-w-0 flex-1">
+            <strong className="block text-xs" id="gpsText">
+              {gpsStatusText}
+            </strong>
+            <small className="block mt-1 text-[#a1b9b0] text-[11px] leading-[1.5]">
+              {gpsSubText}
+            </small>
+          </div>
+          <button
+            type="button"
+            className="btn secondary shrink-0 inline-flex items-center justify-center min-h-[36px] px-3 py-2 border border-[#2b4940] rounded-[10px] bg-[#1a332d] text-[#e7f5ef] text-xs font-[750] hover:border-[#13845f] hover:bg-[#203e34] transition whitespace-nowrap cursor-pointer disabled:opacity-50"
+            onClick={requestGPS}
+            disabled={gpsState === 'loading'}
+          >
+            {gpsState === 'loading' ? 'Locating...' : 'Get my GPS'}
+          </button>
+        </div>
+
+        {/* Fallback map - shown when GPS fails */}
+        {gpsState === 'error' && (
+          <div className="mt-2">
+            <p className="text-[#a1b9b0] text-[11px] mb-2">
+              Tap the map to set your location:
+            </p>
+            <ReportMap onLocationSelect={handleMapSelect} selectedLocation={gpsCoords} />
+          </div>
+        )}
+      </div>
+
+      {/* Photo evidence section */}
+      <div className="form-section flex items-center gap-2 mt-[22px] mb-[14px] text-[13px] font-[800]">
+        <span>📷</span> Photo evidence
+      </div>
+
+      <label
+        className="upload flex flex-col items-center gap-[7px] w-full p-[23px_12px] border-[1.5px] border-dashed border-[#2b4940] rounded-xl bg-[#1a332d] text-center cursor-pointer hover:border-[#13845f]"
+        htmlFor="photo"
+      >
+        <span className="text-[25px]">📸</span>
+        <b>Take a photo of the suspected site</b>
+        <small className="text-[#a1b9b0] text-[11px]">
+          GPS coordinates will be requested after capture.
+        </small>
+        <input
+          id="photo"
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          capture="environment"
+          required
+          className="w-full max-w-full text-[#a1b9b0] text-[11px]"
+          onChange={handlePhotoChange}
+        />
+        {photoPreviewUrl && (
+          <img
+            src={photoPreviewUrl}
+            alt="Captured report photo"
+            className="w-auto max-w-full max-h-[220px] mt-[10px] rounded-[10px] object-contain"
+          />
+        )}
+      </label>
+
+      {/* Report description section */}
+      <div className="form-section flex items-center gap-2 mt-[22px] mb-[14px] text-[13px] font-[800]">
+        <span>📝</span> Report description
+      </div>
+
+      <div className="field flex flex-col gap-[7px] min-w-0 mb-4">
+        <label htmlFor="description" className="text-[#e7f5ef] text-xs font-bold">
+          What did you notice? (Optional)
+        </label>
+        <textarea
+          id="description"
+          name="description"
+          placeholder="Describe the standing water, container, or suspected larvae..."
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          className="w-full min-w-0 min-h-[105px] p-3 border border-[#2b4940] rounded-[10px] outline-none bg-[#0d1e1b] text-[#e7f5ef] text-[13px] resize-y focus:border-[#13845f] focus:shadow-[0_0_0_2px_#13845f22] placeholder:text-[#a1b9b0] placeholder:opacity-80 max-[680px]:text-base"
+        />
+      </div>
+
+      {/* Safety note */}
+      <div className="flex items-start gap-[10px] mt-[10px] p-3 border border-[#2b4940] rounded-[11px] bg-[#1a332d]">
+        <span className="shrink-0">🛡️</span>
+        <p className="m-0 text-[#a1b9b0] text-[11px] leading-[1.6]">
+          Do not touch suspected larvae or enter unsafe areas. Only take photos from a
+          safe location. Do not photograph people&apos;s faces.
+        </p>
+      </div>
+
+      {/* Form actions */}
+      <div className="grid grid-cols-[1fr_1.5fr] gap-[9px] mt-5 max-[680px]:grid-cols-1">
+        <button
+          type="button"
+          className="btn secondary inline-flex items-center justify-center gap-[7px] min-h-[44px] p-[11px_9px] border border-[#2b4940] rounded-[10px] bg-[#1a332d] text-[#e7f5ef] text-xs font-[750] hover:border-[#13845f] hover:bg-[#203e34] transition max-[680px]:w-full max-[680px]:min-h-[45px] max-[680px]:text-[13px] max-[680px]:order-2 cursor-pointer"
+          onClick={handleClear}
+        >
+          Clear form
+        </button>
+        <button
+          type="submit"
+          disabled={!photo || !gpsCoords || submitting}
+          className="btn inline-flex items-center justify-center gap-[7px] min-h-[44px] p-[11px_9px] border border-[#13845f] rounded-[10px] bg-[#13845f] text-white text-xs font-[750] hover:bg-[#169a6d] hover:border-[#169a6d] transition disabled:opacity-50 disabled:cursor-not-allowed max-[680px]:w-full max-[680px]:min-h-[45px] max-[680px]:text-[13px] max-[680px]:order-1 cursor-pointer"
+        >
+          {submitting ? 'Submitting...' : 'Submit report →'}
+        </button>
+      </div>
+
+      {/* Success message */}
+      {submitted && submitResult && (
+        <div
+          ref={successRef}
+          className="mt-4 p-[13px] border border-[#287854] rounded-[10px] bg-[#163d2d] text-[#8ce2b4] text-xs font-bold leading-[1.6]"
+          role="status"
+          aria-live="polite"
+        >
+          ✓ Report submitted successfully!
+          <br />
+          <span className="font-normal">
+            AI check:{' '}
+            {submitResult.ai_check?.is_standing_water &&
+            submitResult.ai_check?.confidence > 0.7
+              ? `Looks like standing water, ${Math.round(
+                  submitResult.ai_check.confidence * 100
+                )}% confident`
+              : 'Needs review — our model could not confirm standing water with high confidence'}
+          </span>
+        </div>
+      )}
+    </form>
+  );
+}
