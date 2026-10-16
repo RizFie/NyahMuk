@@ -1,0 +1,1584 @@
+/* ==========================================
+   NYAHMUK — SHARED STYLESHEET
+   Dashboard: index.html
+   Reporting: report.html
+========================================== */
+
+/* ---------- Theme ---------- */
+
+:root {
+    color-scheme: dark;
+
+    --bg: #0d1e1b;
+    --surface: #142925;
+    --surface2: #1a332d;
+    --text: #e7f5ef;
+    --muted: #a1b9b0;
+    --border: #2b4940;
+
+    --green: #13845f;
+    --green2: #d8f3e6;
+    --green-dark: #073d31;
+
+    --red: #df4b4b;
+    --amber: #d9951c;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    margin: 0;
+    font-family: Inter, "Segoe UI", Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+}
+
+button,
+input,
+select,
+textarea {
+    font: inherit;
+}
+
+button,
+a {
+    -webkit-tap-highlight-color: transparent;
+}
+
+button {
+    cursor: pointer;
+}
+
+img {
+    max-width: 100%;
+}
+
+/* ==========================================
+   SHARED COMPONENTS
+========================================== */
+
+/* Header and brand */
+
+.topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 17px 26px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    color: var(--text);
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    text-decoration: none;
+}
+
+.logo {
+    display: grid;
+    place-items: center;
+    width: 42px;
+    height: 42px;
+    flex-shrink: 0;
+    border-radius: 14px;
+    background: var(--green-dark);
+    color: #c8f4df;
+    font-size: 22px;
+}
+
+.brand small {
+    display: block;
+    margin-top: 3px;
+    color: var(--muted);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1.2px;
+}
+
+.top-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.pill {
+    padding: 8px 13px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    color: var(--muted);
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+/* Buttons */
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    min-height: 40px;
+    padding: 10px 15px;
+    border: 1px solid var(--green);
+    border-radius: 10px;
+    background: var(--green);
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 750;
+    text-align: center;
+    text-decoration: none;
+    transition: background 0.2s, border-color 0.2s;
+}
+
+.btn:hover {
+    background: #169a6d;
+    border-color: #169a6d;
+}
+
+.btn.secondary {
+    border-color: var(--border);
+    background: var(--surface2);
+    color: var(--text);
+}
+
+.btn.secondary:hover {
+    border-color: var(--green);
+    background: #203e34;
+}
+
+/* Panels */
+
+.panel {
+    min-width: 0;
+    padding: 18px;
+    border: 1px solid var(--border);
+    border-radius: 17px;
+    background: var(--surface);
+}
+
+.panel-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.panel-title h2 {
+    margin: 0;
+    font-size: 16px;
+}
+
+.panel-title > span {
+    color: var(--muted);
+    font-size: 11px;
+}
+
+.eyebrow {
+    color: #20b785;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+}
+
+.notice {
+    margin: 13px 0 0;
+    color: var(--muted);
+    font-size: 11px;
+    line-height: 1.6;
+}
+
+/* ==========================================
+   DASHBOARD — index.html
+========================================== */
+
+/* Main layout */
+
+.layout {
+    display: grid;
+    grid-template-columns: 230px minmax(0, 1fr);
+    min-height: calc(100vh - 76px);
+}
+
+.layout aside {
+    padding: 24px 15px;
+    background: #0a2821;
+    color: #e8fff5;
+}
+
+.side-label {
+    margin: 12px 0;
+    padding: 0 12px;
+    color: #90b5a6;
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+}
+
+.nav {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    margin: 4px 0;
+    padding: 13px 14px;
+    border-radius: 12px;
+    color: #c5ddd3;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.nav:hover,
+.nav.active {
+    background: #197e5c;
+    color: white;
+}
+
+.ico {
+    width: 22px;
+    font-size: 18px;
+    text-align: center;
+}
+
+.aside-note {
+    margin: 35px 6px 0;
+    padding: 15px;
+    border: 1px solid #356a56;
+    border-radius: 14px;
+    color: #bdd8cb;
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+.main {
+    width: 100%;
+    max-width: 1500px;
+    min-width: 0;
+    margin: 0 auto;
+    padding: 28px;
+}
+
+/* Dashboard heading */
+
+.pagehead {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 22px;
+}
+
+.pagehead h1 {
+    margin: 5px 0;
+    font-size: 30px;
+    letter-spacing: -1px;
+}
+
+.pagehead p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.demo-label {
+    padding: 9px 12px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--muted);
+    font-size: 11px;
+    white-space: nowrap;
+}
+
+/* Statistics */
+
+.stats {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 14px;
+    margin-bottom: 18px;
+}
+
+.stat {
+    min-width: 0;
+    padding: 18px;
+    border: 1px solid var(--border);
+    border-radius: 17px;
+    background: var(--surface);
+}
+
+.stat-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.stat-icon {
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    flex-shrink: 0;
+    border-radius: 11px;
+    background: var(--surface2);
+    font-size: 17px;
+}
+
+.num {
+    margin: 12px 0 3px;
+    font-size: 29px;
+    font-weight: 800;
+    letter-spacing: -1px;
+}
+
+.stat-foot {
+    color: var(--muted);
+    font-size: 11px;
+    line-height: 1.5;
+}
+
+.up {
+    color: #37c894;
+    font-weight: 700;
+}
+
+.danger {
+    color: #ff7777;
+    font-weight: 700;
+}
+
+/* Dashboard grid */
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.6fr) minmax(280px, 1fr);
+    gap: 16px;
+}
+
+/* Illustrative map */
+
+.map {
+    position: relative;
+    height: 330px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: 13px;
+    background-color: #e4eee2;
+    background-image:
+        linear-gradient(
+            35deg,
+            transparent 46%,
+            #fff 47%,
+            #fff 48%,
+            transparent 49%
+        ),
+        linear-gradient(
+            120deg,
+            transparent 46%,
+            #fff 47%,
+            #fff 48%,
+            transparent 49%
+        ),
+        linear-gradient(
+            8deg,
+            transparent 46%,
+            #fff 47%,
+            #fff 48%,
+            transparent 49%
+        ),
+        repeating-linear-gradient(
+            0deg,
+            transparent 0 36px,
+            #c7d9c7 37px 39px
+        ),
+        repeating-linear-gradient(
+            90deg,
+            transparent 0 42px,
+            #c7d9c7 43px 45px
+        );
+    background-size:
+        160px 130px,
+        220px 170px,
+        270px 210px,
+        auto,
+        auto;
+}
+
+.map::before {
+    position: absolute;
+    top: 48%;
+    left: -10%;
+    width: 125%;
+    height: 42px;
+    transform: rotate(-24deg);
+    background: #8ccbd1;
+    content: "";
+    opacity: 0.85;
+}
+
+.heat {
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(
+            ellipse at 55% 47%,
+            #f0443dcc 0%,
+            #ff9c35bb 13%,
+            #ffe55d99 25%,
+            transparent 42%
+        ),
+        radial-gradient(
+            ellipse at 25% 65%,
+            #ffb22a99 0%,
+            #ffe76677 16%,
+            transparent 31%
+        ),
+        radial-gradient(
+            ellipse at 75% 23%,
+            #ffe65d88 0%,
+            transparent 24%
+        );
+}
+
+.map-label {
+    position: absolute;
+    z-index: 1;
+    padding: 4px 7px;
+    border-radius: 5px;
+    background: #ffffffdd;
+    color: #24483b;
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.label-one {
+    top: 19%;
+    left: 17%;
+}
+
+.label-two {
+    top: 47%;
+    left: 48%;
+}
+
+.label-three {
+    bottom: 17%;
+    left: 20%;
+}
+
+.pin {
+    position: absolute;
+    z-index: 2;
+    width: 25px;
+    height: 25px;
+    transform: rotate(-45deg);
+    border: 2px solid white;
+    border-radius: 50% 50% 50% 0;
+    box-shadow: 0 2px 7px #153c3033;
+}
+
+.pin::after {
+    position: absolute;
+    top: 7px;
+    left: 7px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: white;
+    content: "";
+}
+
+.pin.high {
+    background: #dc4646;
+}
+
+.pin.medium {
+    background: #e8a11e;
+}
+
+.pin.low {
+    background: #16875d;
+}
+
+.pin-one {
+    top: 42%;
+    left: 52%;
+}
+
+.pin-two {
+    top: 55%;
+    left: 32%;
+}
+
+.pin-three {
+    top: 27%;
+    left: 68%;
+}
+
+.pin-four {
+    top: 23%;
+    left: 42%;
+}
+
+.pin-five {
+    top: 58%;
+    left: 76%;
+}
+
+.pin-six {
+    top: 28%;
+    left: 22%;
+}
+
+.pin-seven {
+    top: 74%;
+    left: 82%;
+}
+
+/* Map legend */
+
+.legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 13px;
+    margin-top: 13px;
+    color: var(--muted);
+    font-size: 11px;
+}
+
+.dot {
+    display: inline-block;
+    width: 9px;
+    height: 9px;
+    margin-right: 5px;
+    border-radius: 50%;
+}
+
+.high-dot {
+    background: #e94b4b;
+}
+
+.medium-dot {
+    background: #eda72a;
+}
+
+.low-dot {
+    background: #19885d;
+}
+
+/* Priority areas */
+
+.risk-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.risk-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.risk-row:last-child {
+    border-bottom: 0;
+}
+
+.risk-marker {
+    display: grid;
+    place-items: center;
+    width: 35px;
+    height: 35px;
+    flex-shrink: 0;
+    border-radius: 11px;
+    background: #482929;
+    color: #ff7777;
+    font-weight: 800;
+}
+
+.risk-marker.amber {
+    background: #43351c;
+    color: #f4bd50;
+}
+
+.risk-marker.green {
+    background: #1b3d30;
+    color: #55d7a0;
+}
+
+.risk-info {
+    min-width: 0;
+}
+
+.risk-info strong {
+    display: block;
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.risk-info small {
+    display: block;
+    margin-top: 4px;
+    color: var(--muted);
+    font-size: 11px;
+    line-height: 1.5;
+}
+
+/* Status tags */
+
+.tag {
+    margin-left: auto;
+    padding: 5px 8px;
+    border-radius: 999px;
+    background: #482929;
+    color: #ff9999;
+    font-size: 10px;
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+.medium-tag {
+    background: #43351c;
+    color: #f4bd50;
+}
+
+.low-tag {
+    background: #1b3d30;
+    color: #55d7a0;
+}
+
+/* Dashboard report table */
+
+.table-panel {
+    margin-top: 16px;
+}
+
+.table-wrap {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    min-width: 560px;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+th {
+    padding: 11px;
+    border-bottom: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+}
+
+td {
+    padding: 13px 11px;
+    border-bottom: 1px solid var(--border);
+    font-size: 12px;
+}
+
+tr:last-child td {
+    border-bottom: 0;
+}
+
+/* ==========================================
+   REPORT PAGE — report.html
+========================================== */
+
+/* Report page wrapper */
+
+.report-page {
+    min-height: 100vh;
+    background: var(--bg);
+}
+
+.report-app {
+    min-height: 100vh;
+    padding-bottom: 30px;
+}
+
+.report-header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    padding: 12px max(16px, calc((100% - 1000px) / 2));
+}
+
+.report-brand {
+    color: var(--text);
+    text-decoration: none;
+}
+
+.report-dashboard-link {
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+/* Phone-sized content column */
+
+.report-main {
+    width: 100%;
+    max-width: 620px;
+    margin: 0 auto;
+    padding: 27px 18px 35px;
+}
+
+/* Introduction */
+
+.report-intro {
+    margin-bottom: 20px;
+}
+
+.report-intro h1 {
+    margin: 7px 0 9px;
+    font-size: 30px;
+    line-height: 1.2;
+    letter-spacing: -1px;
+}
+
+.report-intro p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+/* Progress steps */
+
+.steps {
+    display: flex;
+    gap: 8px;
+}
+
+.step {
+    flex: 1;
+    padding: 11px 8px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--surface);
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 700;
+    text-align: center;
+}
+
+.report-steps {
+    margin-bottom: 17px;
+}
+
+.report-steps .step {
+    border-color: var(--border);
+    background: var(--surface);
+    color: var(--muted);
+}
+
+.report-steps .step.active {
+    border-color: #b5dfc9;
+    background: var(--green2);
+    color: #116346;
+}
+
+/* Form panel */
+
+.form-panel {
+    padding: 21px;
+}
+
+.report-form-panel {
+    padding: 21px;
+}
+
+.form-section {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 22px 0 14px;
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.form-section:first-child {
+    margin-top: 0;
+}
+
+.report-form-panel .form-section {
+    margin-top: 22px;
+}
+
+.report-form-panel .form-section:first-child {
+    margin-top: 0;
+}
+
+/* Form fields */
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    min-width: 0;
+    margin-bottom: 16px;
+}
+
+.field label {
+    color: var(--text);
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.report-form-panel .field label {
+    color: var(--text);
+    font-size: 12px;
+}
+
+.field input,
+.field select,
+.field textarea {
+    width: 100%;
+    min-width: 0;
+    min-height: 45px;
+    padding: 12px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    outline: none;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 13px;
+}
+
+.report-form-panel .field input,
+.report-form-panel .field select,
+.report-form-panel .field textarea {
+    min-height: 45px;
+    padding: 12px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 13px;
+}
+
+.field input:focus,
+.field select:focus,
+.field textarea:focus {
+    border-color: var(--green);
+    box-shadow: 0 0 0 2px #13845f22;
+}
+
+.field input::placeholder,
+.field textarea::placeholder {
+    color: var(--muted);
+    opacity: 0.8;
+}
+
+.report-form-panel .field input::placeholder,
+.report-form-panel .field textarea::placeholder {
+    color: var(--muted);
+    opacity: 0.8;
+}
+
+.field textarea {
+    min-height: 105px;
+    resize: vertical;
+}
+
+.report-form-panel .field textarea {
+    min-height: 105px;
+    resize: vertical;
+}
+
+.field select option {
+    background: var(--surface);
+    color: var(--text);
+}
+
+/* GPS location */
+
+.gpsbox {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding: 13px;
+    border: 1px solid var(--border);
+    border-radius: 11px;
+    background: var(--surface2);
+}
+
+.report-gpsbox {
+    min-width: 0;
+    align-items: flex-start;
+}
+
+.gps-icon {
+    font-size: 20px;
+}
+
+.report-gpsbox .gps-icon {
+    flex-shrink: 0;
+}
+
+.gps-details {
+    min-width: 0;
+}
+
+.report-gpsbox .gps-details {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.gps-details strong {
+    display: block;
+    font-size: 12px;
+}
+
+.report-gpsbox .gps-details strong {
+    line-height: 1.5;
+}
+
+.gps-details small {
+    display: block;
+    margin-top: 4px;
+    color: var(--muted);
+    font-size: 11px;
+    line-height: 1.5;
+}
+
+.report-gpsbox .gps-details small {
+    display: block;
+    margin-top: 4px;
+    line-height: 1.5;
+}
+
+.report-gps-button {
+    width: 100%;
+    margin-top: 9px;
+    padding: 11px;
+}
+
+.report-gps-button.gps-attached {
+    border-color: var(--green);
+    color: #55d7a0;
+}
+
+/* Photo upload */
+
+.upload {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 7px;
+    width: 100%;
+    padding: 23px 12px;
+    border: 1.5px dashed var(--border);
+    border-radius: 12px;
+    background: var(--surface2);
+    text-align: center;
+    cursor: pointer;
+}
+
+.upload:hover {
+    border-color: var(--green);
+}
+
+.upload input[type="file"] {
+    width: 100%;
+    max-width: 100%;
+    color: var(--muted);
+    font-size: 11px;
+}
+
+.upload small {
+    color: var(--muted);
+    font-size: 11px;
+}
+
+.upload-preview {
+    display: none;
+    width: auto;
+    max-width: 100%;
+    max-height: 220px;
+    margin-top: 10px;
+    border-radius: 10px;
+    object-fit: contain;
+}
+
+.report-upload {
+    display: block;
+    width: 100%;
+    padding: 23px 12px;
+    border: 1.5px dashed var(--border);
+    background: var(--surface2);
+}
+
+.report-upload:hover {
+    border-color: var(--green);
+}
+
+.report-upload-icon {
+    display: block;
+    margin-bottom: 7px;
+    font-size: 29px;
+}
+
+.report-upload b {
+    color: var(--text);
+    font-size: 13px;
+}
+
+.report-upload small {
+    display: block;
+    margin-top: 6px;
+    line-height: 1.5;
+}
+
+.report-upload .upload-preview {
+    width: auto;
+    max-width: 100%;
+    max-height: 220px;
+    object-fit: contain;
+}
+
+/* Safety note */
+
+.report-safety-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-top: 10px;
+    padding: 12px;
+    border: 1px solid var(--border);
+    border-radius: 11px;
+    background: var(--surface2);
+}
+
+.report-safety-note > span {
+    flex-shrink: 0;
+}
+
+.report-safety-note p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 11px;
+    line-height: 1.6;
+}
+
+/* Form action buttons */
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.report-actions {
+    display: grid;
+    grid-template-columns: 1fr 1.5fr;
+    gap: 9px;
+}
+
+.report-actions .btn {
+    min-height: 44px;
+    padding: 11px 9px;
+    font-size: 12px;
+}
+
+/* Success message */
+
+.success {
+    display: none;
+    margin-top: 16px;
+    padding: 13px;
+    border: 1px solid #287854;
+    border-radius: 10px;
+    background: #163d2d;
+    color: #8ce2b4;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.6;
+}
+
+/* Information panel */
+
+.report-info-panel {
+    margin-top: 16px;
+    overflow: hidden;
+    padding: 0;
+}
+
+.report-info-illustration {
+    position: relative;
+    display: grid;
+    place-items: center;
+    height: 115px;
+    overflow: hidden;
+    background:
+        linear-gradient(
+            150deg,
+            transparent 43%,
+            #f5fff5 44%,
+            #f5fff5 56%,
+            transparent 57%
+        ),
+        linear-gradient(25deg, #cce8d8, #9fcfba);
+}
+
+.report-info-illustration::after {
+    position: absolute;
+    width: 150%;
+    height: 25px;
+    transform: rotate(24deg);
+    background: #8ac5cb;
+    content: "";
+    opacity: 0.8;
+}
+
+.report-info-illustration span {
+    position: relative;
+    z-index: 1;
+    font-size: 28px;
+}
+
+.report-info-content {
+    padding: 17px;
+}
+
+.report-info-content h2{
+    margin: 0 0 9px;
+    font-size: 14px;
+}
+
+.report-info-content p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 11px;
+    line-height: 1.7;
+}
+
+.report-info-status {
+    margin-top: 13px;
+    color: #20b785;
+    font-size: 11px;
+    font-weight: 800;
+}
+
+.mini-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.mini-row:last-child {
+    border-bottom: 0;
+}
+
+.mini-row b {
+    flex: 1;
+    min-width: 0;
+    font-size: 11px;
+}
+
+.mini-row span {
+    font-size: 12px;
+}
+
+.mini-row span:last-child {
+    color: var(--muted);
+    font-size: 10px;
+}
+
+/* Footer */
+
+.report-footer {
+    padding: 25px 0 10px;
+    color: var(--muted);
+    font-size: 10px;
+    text-align: center;
+}
+
+/* Mobile bottom navigation */
+
+.report-bottom-nav {
+    display: none;
+}
+
+/* ==========================================
+   TABLET RESPONSIVE — DASHBOARD
+========================================== */
+
+@media (max-width: 1100px) {
+    .layout {
+        grid-template-columns: 190px minmax(0, 1fr);
+    }
+
+    .main {
+        padding: 20px;
+    }
+
+    .stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ==========================================
+   MOBILE RESPONSIVE — BOTH PAGES
+========================================== */
+
+@media (max-width: 680px) {
+    /* Dashboard header */
+
+    .topbar {
+        align-items: flex-start;
+        padding: 13px 15px;
+    }
+
+    .brand {
+        gap: 8px;
+        font-size: 17px;
+    }
+
+    .logo {
+        width: 36px;
+        height: 36px;
+    }
+
+    .brand small {
+        font-size: 9px;
+        letter-spacing: 0.8px;
+    }
+
+    .top-actions {
+        align-items: flex-end;
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .pill {
+        padding: 6px 8px;
+        font-size: 10px;
+    }
+
+    /* Dashboard layout */
+
+    .layout {
+        display: block;
+    }
+
+    .layout aside {
+        display: none;
+    }
+
+    .main {
+        padding: 20px 13px;
+    }
+
+    .pagehead {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .pagehead h1 {
+        font-size: 26px;
+    }
+
+    .pagehead p {
+        font-size: 12px;
+    }
+
+    .demo-label {
+        font-size: 10px;
+    }
+
+    .stats {
+        gap: 9px;
+    }
+
+    .stat {
+        padding: 13px;
+    }
+
+    .stat-top {
+        font-size: 11px;
+    }
+
+    .stat-icon {
+        width: 29px;
+        height: 29px;
+    }
+
+    .num {
+        font-size: 25px;
+    }
+
+    .stat-foot {
+        font-size: 10px;
+    }
+
+    .dashboard-grid {
+        display: block;
+    }
+
+    .dashboard-grid > .panel + .panel {
+        margin-top: 13px;
+    }
+
+    .panel {
+        padding: 14px;
+    }
+
+    .panel-title h2 {
+        font-size: 14px;
+    }
+
+    .panel-title > span {
+        font-size: 10px;
+        text-align: right;
+    }
+
+    .map {
+        height: 260px;
+    }
+
+    .map-label {
+        font-size: 9px;
+    }
+
+    .legend {
+        gap: 9px;
+        font-size: 10px;
+    }
+
+    .risk-row {
+        gap: 8px;
+    }
+
+    .risk-info strong {
+        font-size: 11px;
+    }
+
+    .risk-info small {
+        font-size: 10px;
+    }
+
+    .tag {
+        padding: 5px 6px;
+        font-size: 9px;
+    }
+
+    .table-panel {
+        margin-bottom: 10px;
+    }
+
+    table {
+        min-width: 500px;
+    }
+
+    /* Report header */
+
+    .report-app {
+        padding-bottom: 76px;
+    }
+
+    .report-header {
+        position: sticky;
+        padding: 10px 13px;
+        gap: 8px;
+    }
+
+    .report-brand {
+        gap: 8px;
+        font-size: 17px;
+    }
+
+    .report-brand .logo {
+        width: 36px;
+        height: 36px;
+        border-radius: 12px;
+    }
+
+    .report-brand small {
+        font-size: 8px;
+        letter-spacing: 0.8px;
+    }
+
+    .report-dashboard-link {
+        padding: 9px 11px;
+        font-size: 11px;
+    }
+
+    /* Report content */
+
+    .report-main {
+        max-width: 460px;
+        padding: 22px 13px 25px;
+    }
+
+    .report-intro {
+        margin-bottom: 17px;
+    }
+
+    .report-intro h1 {
+        max-width: 360px;
+        font-size: 27px;
+        line-height: 1.25;
+    }
+
+    .report-intro p {
+        font-size: 12px;
+    }
+
+    .report-steps {
+        gap: 6px;
+    }
+
+    .report-steps .step {
+        padding: 10px 3px;
+        font-size: 9px;
+    }
+
+    .report-form-panel {
+        padding: 16px 13px;
+    }
+
+    .report-form-panel .form-section {
+        margin-top: 21px;
+        font-size: 12px;
+    }
+
+    .report-form-panel .field {
+        margin-bottom: 14px;
+    }
+
+    /* Prevent mobile browsers from zooming in on form fields */
+
+    .report-form-panel .field input,
+    .report-form-panel .field select,
+    .report-form-panel .field textarea {
+        font-size: 16px;
+    }
+
+    .report-gpsbox {
+        padding: 11px;
+    }
+
+    .report-upload {
+        padding: 20px 10px;
+    }
+
+    .report-actions {
+        grid-template-columns: 1fr;
+    }
+
+    .report-actions .btn {
+        width: 100%;
+        min-height: 45px;
+        font-size: 13px;
+    }
+
+    .report-actions #clearForm {
+        order: 2;
+    }
+
+    .report-actions button[type="submit"] {
+        order: 1;
+    }
+
+    /* Report information cards */
+
+    .report-info-illustration {
+        height: 105px;
+    }
+
+    /* Fixed bottom navigation, report page only */
+
+    .report-bottom-nav {
+        position: fixed;
+        z-index: 20;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        display: flex;
+        justify-content: space-around;
+        padding: 9px 5px calc(9px + env(safe-area-inset-bottom));
+        border-top: 1px solid var(--border);
+        background: var(--surface);
+    }
+
+    .report-bottom-nav a {
+        display: flex;
+        min-width: 70px;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+        color: var(--muted);
+        font-size: 10px;
+        text-decoration: none;
+    }
+
+    .report-bottom-nav a span {
+        font-size: 19px;
+    }
+
+    .report-bottom-nav a.active {
+        color: #20b785;
+        font-weight: 800;
+    }
+}
+
+/* Small phones */
+
+@media (max-width: 380px) {
+    .report-main {
+        padding-right: 10px;
+        padding-left: 10px;
+    }
+
+    .report-intro h1 {
+        font-size: 24px;
+    }
+
+    .report-form-panel {
+        padding: 13px 10px;
+    }
+
+    .report-steps .step {
+        font-size: 8px;
+    }
+
+    .report-dashboard-link {
+        padding: 8px;
+        font-size: 10px;
+    }
+
+    .report-brand small {
+        font-size: 7px;
+    }
+}

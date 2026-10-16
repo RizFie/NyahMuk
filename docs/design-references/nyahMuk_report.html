@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NyahMuk — Report a Breeding Site</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body class="report-page">
+    <div class="report-app">
+
+        <!-- Header -->
+        <header class="topbar report-header">
+            <a href="index.html" class="brand report-brand">
+                <div class="logo">♧</div>
+                <div>
+                    NyahMuk
+                    <small>COMMUNITY REPORTING</small>
+                </div>
+            </a>
+
+            <a href="index.html" class="btn secondary report-dashboard-link">
+                Dashboard
+            </a>
+        </header>
+
+        <main class="report-main">
+            <!-- Introduction -->
+            <section class="report-intro">
+                <div class="eyebrow">Community contribution</div>
+                <h1>Report a Breeding Site</h1>
+                <p>
+                    Help your community identify possible mosquito
+                    breeding locations.
+                </p>
+                <p style="color: red;">
+                    If possible you can take action to eliminate mosquito breeding sites without submitting a report.
+                </p>
+            </section>
+
+            <!-- Progress -->
+            <div class="steps report-steps">
+                <div class="step active">1 · Snap</div>
+                <div class="step active">2 · Submit</div>
+            </div>
+
+            <!-- Report form -->
+            <section class="panel form-panel report-form-panel">
+                <form id="reportForm">
+
+                    <div class="field">
+                        <label>GPS location</label>
+                        <div class="gpsbox">
+                            <span class="gps-icon">📍</span>
+                            <div>
+                                <strong id="gpsText">Waiting for photo capture</strong>
+                                <small id="gpsSub">
+                                    Take a photo to automatically get your coordinates.
+                                </small>
+                            </div>
+                            <button type="button" class="btn secondary" onclick="attachGPS()">
+                                Get my GPS
+                            </button>
+                        </div>
+
+                        <button
+                            type="button"
+                            class="btn secondary report-gps-button"
+                            id="gpsButton"
+                        >
+                            Attach demo GPS
+                        </button>
+                    </div>
+
+                    <div class="form-section">
+                        <span>📷</span> Photo evidence
+                    </div>
+
+                    <label class="upload" for="photo">
+                        <span style="font-size:25px">📸</span>
+                        <b>Take a photo of the suspected site</b>
+                        <small>GPS coordinates will be requested after capture.</small>
+
+                        <input
+                            id="photo"
+                            type="file"
+                            accept="image/*"
+                            capture="environment"
+                            required
+                        >
+
+                        <img
+                            id="photoPreview"
+                            class="upload-preview"
+                            alt="Captured report photo"
+                        >
+                    </label>
+
+                    <div class="form-section">
+                        <span>📝</span> Report description
+                    </div>
+
+                    <div class="field">
+                        <label for="description">
+                            What did you notice? (Optional)
+                        </label>
+                        <textarea
+                            id="description"
+                            name="description"
+                            placeholder="Describe the standing water, container, or suspected larvae..."
+                        ></textarea>
+                    </div>  
+
+                    <div class="report-safety-note">
+                        <span>🛡️</span>
+                        <p>
+                            Do not touch suspected larvae or enter
+                            unsafe areas. Only take photos from a
+                            safe location.
+                        </p>
+                    </div>
+
+                    <div class="form-actions report-actions">
+                        <button
+                            type="button"
+                            class="btn secondary"
+                            id="clearForm"
+                        >
+                            Clear form
+                        </button>
+
+                        <button type="submit" class="btn">
+                            Submit report →
+                        </button>
+                    </div>
+
+                    <div
+                        class="success"
+                        id="successMsg"
+                        role="status"
+                        aria-live="polite"
+                    >
+                        ✓ Demo report submitted successfully!
+                    </div>
+
+                    <p class="notice">
+                        Prototype only. Reports are not sent to a
+                        real authority or database.
+                    </p>
+                </form>
+            </section>
+
+            <!-- Information -->
+            <section class="panel report-info-panel">
+                <div class="report-info-illustration">
+                    <span>📍</span>
+                </div>
+
+                <div class="report-info-content">
+                    <h2>What happens next?</h2>
+                    <p>
+                        Your report can help identify locations that
+                        may need inspection. In the planned NyahMuk
+                        system, reports can be reviewed and prioritised
+                        for follow-up.
+                    </p>
+                    <div class="report-info-status">
+                        ✓ Community-powered prevention
+                    </div>
+                </div>
+            </section>
+
+            <footer class="report-footer">
+                NyahMuk · Detect, Predict, Prevent
+            </footer>
+        </main>
+
+        <!-- Mobile navigation -->
+        <nav class="report-bottom-nav">
+            <a href="index.html">
+                <span>▦</span>
+                Dashboard
+            </a>
+
+            <a href="report.html" class="active">
+                <span>＋</span>
+                Report
+            </a>
+
+            <a href="index.html#reports">
+                <span>▤</span>
+                Reports
+            </a>
+        </nav>
+    </div>
+
+    <script>
+        const form = document.getElementById("reportForm");
+        const photoInput = document.getElementById("photo");
+        const photoPreview = document.getElementById("photoPreview");
+        const gpsButton = document.getElementById("gpsButton");
+        const gpsText = document.getElementById("gpsText");
+        const gpsSub = document.getElementById("gpsSub");
+        const successMsg = document.getElementById("successMsg");
+        const clearButton = document.getElementById("clearForm");
+
+        let gpsAttached = false;
+        let previewUrl = null;
+        let gpsCoordinates = null;
+
+        function attachGPS() {
+            const gpsText = document.getElementById("gpsText");
+            const gpsSub = document.getElementById("gpsSub");
+            const gpsBox = document.querySelector(".gpsbox");
+
+            if (!navigator.geolocation) {
+                gpsText.textContent = "GPS unavailable";
+                gpsSub.textContent = "Your browser does not support GPS.";
+                return;
+            }
+
+            gpsText.textContent = "Getting coordinates...";
+            gpsSub.textContent = "Please allow location access.";
+
+            navigator.geolocation.getCurrentPosition(
+                position => {
+                    gpsCoordinates = {
+                        latitude: position.coords.latitude,
+                        longitude: position.coords.longitude,
+                        accuracy: Math.round(position.coords.accuracy)
+                    };
+
+                    gpsAttached = true;
+
+                    gpsText.textContent =
+                        `${gpsCoordinates.latitude.toFixed(6)}, ` +
+                        `${gpsCoordinates.longitude.toFixed(6)}`;
+
+                    gpsSub.textContent =
+                        `GPS accuracy: approximately ${gpsCoordinates.accuracy} m`;
+
+                    gpsBox.style.borderColor = "var(--green)";
+                },
+                error => {
+                    gpsAttached = false;
+                    gpsCoordinates = null;
+
+                    gpsText.textContent = "Unable to get GPS";
+                    gpsSub.textContent =
+                        "Allow location access and try again.";
+
+                    gpsBox.style.borderColor = "var(--amber)";
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 15000,
+                    maximumAge: 0
+                }
+            );
+        }
+
+        const photo = document.getElementById("photo");
+
+        photo.addEventListener("change", () => {
+            const file = photo.files[0];
+
+            if (!file) return;
+
+            if (!file.type.startsWith("image/")) {
+                alert("Please capture an image.");
+                photo.value = "";
+                return;
+            }
+
+            const preview = document.getElementById("photoPreview");
+
+            preview.src = URL.createObjectURL(file);
+            preview.style.display = "block";
+
+            // Automatically request GPS after photo capture
+            attachGPS();
+        });
+
+        form.addEventListener("submit", (event) => {
+            event.preventDefault();
+
+            if (!form.reportValidity()) return;
+
+            successMsg.style.display = "block";
+            successMsg.scrollIntoView({
+                behavior: "smooth",
+                block: "nearest"
+            });
+        });
+
+        clearButton.addEventListener("click", () => {
+            form.reset();
+
+            gpsAttached = false;
+            gpsText.textContent = "Location not attached";
+            gpsSub.textContent =
+                "Attach a location to help identify the reported site.";
+
+            gpsButton.textContent = "Attach demo GPS";
+            gpsButton.classList.remove("gps-attached");
+
+            successMsg.style.display = "none";
+            photoPreview.style.display = "none";
+            photoPreview.removeAttribute("src");
+
+            if (previewUrl) {
+                URL.revokeObjectURL(previewUrl);
+                previewUrl = null;
+            }
+        });
+    </script>
+</body>
+</html>

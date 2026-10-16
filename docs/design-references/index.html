@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NyahMuk — Risk Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app">
+        <!-- Top navigation -->
+        <header class="topbar">
+            <div class="brand">
+                <div class="logo">♧</div>
+                <div>
+                    NyahMuk
+                    <small>DASHBOARD · DETECT · PREDICT</small>
+                </div>
+            </div>
+
+            <div class="top-actions">
+                <span class="pill">📍 Taman Seri Jaya</span>
+                <span class="pill">Demo prototype</span>
+            </div>
+        </header>
+
+        <div class="layout">
+            <!-- Sidebar -->
+            <aside>
+                <div class="side-label">Workspace</div>
+
+                <a class="nav active" href="#dashboard">
+                    <span class="ico">▦</span> Dashboard
+                </a>
+
+                <a class="nav" href="#risk-map">
+                    <span class="ico">⌖</span> Risk Map
+                </a>
+
+                <a class="nav" href="#priority">
+                    <span class="ico">⚠</span> Priority Areas
+                </a>
+
+                <a class="nav" href="#reports">
+                    <span class="ico">▤</span> Community Reports
+                </a>
+
+                <div class="aside-note">
+                    🛡️ <b>Healthier communities.</b>
+                    <br>
+                    Safer tomorrows. Help identify mosquito breeding
+                    sites before they become a bigger risk.
+                </div>
+            </aside>
+
+            <!-- Dashboard content -->
+            <main class="main" id="dashboard">
+                <div class="pagehead">
+                    <div>
+                        <div class="eyebrow">Township overview</div>
+                        <h1>Risk Dashboard</h1>
+                        <p>
+                            Monitor potential mosquito breeding hotspots
+                            and community activity.
+                        </p>
+                    </div>
+                    <span class="demo-label">Illustrative demo data</span>
+                </div>
+
+                <!-- Statistics -->
+                <section class="stats">
+                    <div class="stat">
+                        <div class="stat-top">
+                            High-risk zones
+                            <span class="stat-icon">⚠</span>
+                        </div>
+                        <div class="num">08</div>
+                        <div class="stat-foot">
+                            <span class="danger">Needs attention</span>
+                            · Priority inspection
+                        </div>
+                    </div>
+
+                    <div class="stat">
+                        <div class="stat-top">
+                            Reports received
+                            <span class="stat-icon">▤</span>
+                        </div>
+                        <div class="num">24</div>
+                        <div class="stat-foot">
+                            <span class="up">↑ Community activity</span>
+                            · This month
+                        </div>
+                    </div>
+
+                    <div class="stat">
+                        <div class="stat-top">
+                            Sites under review
+                            <span class="stat-icon">⌕</span>
+                        </div>
+                        <div class="num">06</div>
+                        <div class="stat-foot">Awaiting verification</div>
+                    </div>
+
+                    <div class="stat">
+                        <div class="stat-top">
+                            Resolved reports
+                            <span class="stat-icon">✓</span>
+                        </div>
+                        <div class="num">18</div>
+                        <div class="stat-foot">
+                            <span class="up">75% resolved</span>
+                            · Sample data
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Risk map and priority areas -->
+                <section class="dashboard-grid">
+                    <div class="panel" id="risk-map">
+                        <div class="panel-title">
+                            <h2>Predicted Risk Map</h2>
+                            <span>Illustrative demo map</span>
+                        </div>
+
+                        <div class="map">
+                            <div class="heat"></div>
+
+                            <span class="map-label label-one">
+                                Taman Murni
+                            </span>
+                            <span class="map-label label-two">
+                                Taman Seri Jaya
+                            </span>
+                            <span class="map-label label-three">
+                                Taman Harmoni
+                            </span>
+
+                            <i class="pin high pin-one"></i>
+                            <i class="pin high pin-two"></i>
+                            <i class="pin high pin-three"></i>
+                            <i class="pin medium pin-four"></i>
+                            <i class="pin medium pin-five"></i>
+                            <i class="pin low pin-six"></i>
+                            <i class="pin low pin-seven"></i>
+                        </div>
+
+                        <div class="legend">
+                            <span><i class="dot high-dot"></i>High risk</span>
+                            <span><i class="dot medium-dot"></i>Medium risk</span>
+                            <span><i class="dot low-dot"></i>Lower risk</span>
+                        </div>
+
+                        <p class="notice">
+                            Map locations and risk zones are illustrative
+                            and do not represent actual predictions.
+                        </p>
+                    </div>
+
+                    <div class="panel" id="priority">
+                        <div class="panel-title">
+                            <h2>Priority Areas</h2>
+                            <span>Inspection list</span>
+                        </div>
+
+                        <div class="risk-list">
+                            <div class="risk-row">
+                                <div class="risk-marker">!</div>
+                                <div class="risk-info">
+                                    <strong>Jalan Melati drainage</strong>
+                                    <small>Stagnant water reported · 2 hours ago</small>
+                                </div>
+                                <span class="tag">HIGH</span>
+                            </div>
+
+                            <div class="risk-row">
+                                <div class="risk-marker">!</div>
+                                <div class="risk-info">
+                                    <strong>Block 12, Taman Seri Jaya</strong>
+                                    <small>Potential breeding container · Today</small>
+                                </div>
+                                <span class="tag">HIGH</span>
+                            </div>
+
+                            <div class="risk-row">
+                                <div class="risk-marker amber">!</div>
+                                <div class="risk-info">
+                                    <strong>Community playground</strong>
+                                    <small>Standing water · Yesterday</small>
+                                </div>
+                                <span class="tag medium-tag">MEDIUM</span>
+                            </div>
+
+                            <div class="risk-row">
+                                <div class="risk-marker green">✓</div>
+                                <div class="risk-info">
+                                    <strong>Jalan Kenanga</strong>
+                                    <small>Inspection completed</small>
+                                </div>
+                                <span class="tag low-tag">REVIEWED</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Latest community reports -->
+                <section class="panel table-panel" id="reports">
+                    <div class="panel-title">
+                        <h2>Latest Community Reports</h2>
+                        <span>Recent activity</span>
+                    </div>
+
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Report ID</th>
+                                    <th>Location</th>
+                                    <th>Issue</th>
+                                    <th>Reported</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                <tr>
+                                    <td>#NM-024</td>
+                                    <td>Jalan Melati</td>
+                                    <td>Stagnant water</td>
+                                    <td>2 hours ago</td>
+                                    <td><span class="tag">New</span></td>
+                                </tr>
+                                <tr>
+                                    <td>#NM-023</td>
+                                    <td>Block 12</td>
+                                    <td>Open container</td>
+                                    <td>Today</td>
+                                    <td><span class="tag medium-tag">Reviewing</span></td>
+                                </tr>
+                                <tr>
+                                    <td>#NM-022</td>
+                                    <td>Jalan Kenanga</td>
+                                    <td>Blocked drain</td>
+                                    <td>Yesterday</td>
+                                    <td><span class="tag low-tag">Resolved</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <p class="notice">
+                        All reports shown are fictional sample data for
+                        the NyahMuk interface prototype.
+                    </p>
+                </section>
+            </main>
+        </div>
+    </div>
+</body>
+</html>
