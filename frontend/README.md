@@ -1,107 +1,204 @@
-# NyahMuk Frontend
+# NyahMuk: Prediction and Prevention of Mosquitoes
 
-Mosquito breeding-risk prediction and community reporting dashboard — built with Next.js, TypeScript, and Tailwind CSS.
+A web platform that predicts mosquito breeding hotspots in a township, lets residents report possible breeding sites with a photo and GPS, and gives management a prioritised action list.
 
-## Tech Stack
+Built for the Sime Darby Property University Hackathon 2026, "Township of Tomorrow".
+Proposed track: People, Community wellbeing (confirm before submission).
 
-- **Next.js 16** (App Router, TypeScript)
-- **Tailwind CSS v4** — utility-first styling, no component library
-- **react-leaflet** + **Leaflet** — interactive risk map with OpenStreetMap tiles
-- **@tanstack/react-query** — data fetching and cache management
-- **next/font/google (Inter)** — optimised web font loading
+## Team
 
-## Getting Started
+| Role | Name | Works in |
+|---|---|---|
+| Frontend + integration | [name] | `frontend/` |
+| ML + backend | [name] | `backend/` |
+| Research, survey, pitch | [names] | `docs/` |
 
+## Folder structure
+
+```
+nyahmuk/
+├── README.md              # this file: the plan and the API contract
+├── .gitignore
+├── docs/
+│   └── ai-usage-log.md    # hackathon T&C: log every AI tool we use
+│
+├── frontend/              # Next.js app
+│   ├── app/
+│   │   ├── page.tsx           # risk map (home)
+│   │   ├── report/page.tsx    # citizen report form
+│   │   ├── dashboard/page.tsx # management action board
+│   │   ├── about-model/page.tsx
+│   │   └── api/               # mock API (used until the real backend is ready)
+│   ├── components/        # RiskMap, ReportForm, Navbar, etc.
+│   ├── lib/
+│   │   ├── api.ts             # functions that call the backend
+│   │   ├── types.ts           # types matching the API contract below
+│   │   └── mock-data.ts       # fake data for the mock API
+│   ├── public/
+│   └── .env.local.example     # NEXT_PUBLIC_API_BASE_URL=
+│
+└── backend/               # Python FastAPI, kept deliberately small
+    ├── main.py            # the whole API (about 5 endpoints)
+    ├── photo_check.py     # check_photo(path) -> label, is_standing_water, confidence
+    ├── make_risk_json.py  # builds the grid (build_grid), scores risk from weather + reports, writes data/risk.json
+    ├── requirements.txt
+    ├── data/
+    │   ├── risk.json          # precomputed predictions, days 0 to 6
+    │   ├── model_info.json    # version, data sources, metrics
+    │   └── reports.json       # citizen reports (written by the API, read by make_risk_json.py)
+    ├── uploads/           # report photos (not in git)
+    └── notebooks/         # training and experiments
+```
+
+How it fits together: `make_risk_json.py` builds `data/risk.json` from weather and from the citizen reports in `data/reports.json` -> `main.py` serves it -> the frontend draws it on a map. A new report goes the other way: the frontend uploads a photo -> `photo_check.py` labels it -> the API saves it to `reports.json` (with its `cell_id`) -> `make_risk_json.py` is re-run so the map updates. There is no database. The API reads and writes JSON files.
+
+## API contract (the single source of truth)
+
+Both sides build to these shapes. Tell each other before changing anything, then update `frontend/lib/types.ts` and `backend/main.py` to match.
+
+**`GET /risk?day=0..6`**
+```json
+{
+  "generated_at": "2026-10-15T06:00:00+08:00",
+  "day": 0,
+  "horizon_days": 7,
+  "model_version": "v0.1-rules",
+  "cells": [
+    {
+      "cell_id": "A12",
+      "geometry": { "type": "Polygon", "coordinates": [[[101.1,4.2],[101.1,4.21],[101.11,4.21],[101.11,4.2],[101.1,4.2]]] },
+      "risk_score": 0.82,
+      "risk_level": "high",
+      "top_factors": ["rain_last_7d_high", "reports_nearby_2"],
+      "confidence": "medium"
+    }
+  ]
+}
+```
+- `risk_level`: `low`, `medium` or `high`. `confidence`: `low`, `medium` or `high`.
+- Factor codes: `rain_last_7d_high`, `temp_optimal`, `humidity_high`, `reports_nearby_N`. (`near_water_body` and `near_construction_site` are reserved for later and not produced yet.)
+- Always return all cells. A cell with no data is low risk with low confidence.
+
+**`GET /model-info`**: `{ model_version, last_trained, data_sources: [], metrics: [{ name, value, note }] }`
+
+**`GET /reports`**: `[{ id, lat, lng, photo_url, note, location_label?, created_at, status, assigned_to, ai_check: { label, is_standing_water, confidence }, cell_id }]`
+- `status`: `new`, `assigned` or `cleared`.
+- `ai_check.confidence` is a number from 0 to 1. `is_standing_water` is `true` only when the photo check is confident enough to count the report.
+- `make_risk_json.py` reads `status`, `created_at`, `lat`, `lng`, `ai_check.is_standing_water` and `ai_check.confidence` from `data/reports.json`, so keep those names and types exactly. `created_at` must include a timezone. `cell_id` comes from `build_grid()` in `make_risk_json.py` plus shapely (point in polygon).
+- `location_label` is optional. If it is missing, the frontend shows "Cell A12".
+
+**`POST /reports`** (multipart: `photo`, `lat`, `lng`, optional `note`): returns the created report.
+
+**`PATCH /reports/{id}`** (JSON: `{ status, assigned_to? }`): returns the updated report.
+
+Rules: GeoJSON coordinates are `[lng, lat]`. Timestamps include a timezone (`+08:00`). No `NaN` in JSON. Errors look like `{ "error": "message" }`.
+
+## Run it locally
+
+**Backend**
 ```bash
-# Install dependencies
+cd backend
+python -m venv venv
+source venv/bin/activate          # Windows: venv\Scripts\activate
+pip install -r requirements.txt
+python make_risk_json.py          # builds data/risk.json (needed before the first run)
+uvicorn main:app --reload
+```
+Open http://localhost:8000/docs to see and test the API.
+
+**Frontend**
+```bash
+cd frontend
 npm install
-
-# Copy env example and configure (optional)
-cp .env.local.example .env.local
-
-# Start development server
+cp .env.local.example .env.local   # leave the API URL empty to use the mock API
 npm run dev
-
-# Build for production
-npm run build
-npm start
 ```
+Open http://localhost:3000.
 
-## Environment Variables
+To use the real backend, set `NEXT_PUBLIC_API_BASE_URL=http://localhost:8000` in `frontend/.env.local`.
 
-| Variable | Description |
-|---|---|
-| `NEXT_PUBLIC_API_BASE_URL` | Base URL for the backend API. Leave empty to use built-in mock API routes with demo data. |
+### `backend/requirements.txt`
 
-## Folder Structure
+Start with this. Python 3.11 is a safe version to use for everything below.
 
 ```
-frontend/
-├── app/
-│   ├── page.tsx                    # Dashboard (/)
-│   ├── report/page.tsx             # Report a Breeding Site (/report)
-│   ├── about-model/page.tsx        # About the Model (/about-model)
-│   ├── layout.tsx                  # Root layout with font + providers
-│   ├── globals.css                 # Tailwind import + Leaflet dark theme
-│   └── api/                        # Mock API route handlers
-│       ├── risk/route.ts           # GET /api/risk?day=0..6
-│       ├── reports/route.ts        # GET/POST /api/reports
-│       ├── reports/[id]/route.ts   # PATCH /api/reports/:id
-│       └── model-info/route.ts     # GET /api/model-info
-├── components/
-│   ├── Topbar.tsx                  # Top navigation bar
-│   ├── Sidebar.tsx                 # Desktop sidebar navigation
-│   ├── StatCard.tsx                # Dashboard statistic card
-│   ├── RiskMap.tsx                 # Dynamic Leaflet map wrapper
-│   ├── RiskMapInner.tsx            # Leaflet map with risk grid + reports
-│   ├── ReportMap.tsx               # Dynamic map for report GPS fallback
-│   ├── ReportMapInner.tsx          # Clickable map for location selection
-│   ├── Legend.tsx                  # Risk level legend
-│   ├── DaySlider.tsx               # Day forecast selector
-│   ├── PriorityList.tsx            # Priority areas list
-│   ├── ReportsTable.tsx            # Community reports table with actions
-│   ├── ReportForm.tsx              # Report submission form
-│   ├── BottomNav.tsx               # Mobile bottom navigation
-│   ├── StatusTag.tsx               # Status badge component
-│   └── Providers.tsx               # TanStack Query provider
-├── lib/
-│   ├── api.ts                      # API client functions
-│   ├── types.ts                    # TypeScript type definitions
-│   ├── config.ts                   # App configuration constants
-│   ├── risk.ts                     # Risk colours and factor labels
-│   ├── time.ts                     # Relative time formatting
-│   └── mock-data.ts                # In-memory mock data store
-├── public/                         # Static assets
-├── .env.local.example              # Environment variable template
-└── package.json
+# --- Core API (needed from day 1) ---
+fastapi
+uvicorn[standard]
+python-multipart      # lets the API accept photo uploads
+requests              # calls the Open-Meteo weather API
+pillow                # opens and saves report photos
+shapely               # finds which grid cell a GPS point is in
+
+# --- Risk scoring (add when you start make_risk_json.py) ---
+pandas
+numpy
+
+# --- Photo check (add when you start photo_check.py) ---
+# torch               # large download: install the CPU version on a laptop
+# transformers        # loads the CLIP model from Hugging Face
+# scikit-learn        # linear probe on CLIP embeddings
+
+# --- Only if training on dengue data (notebooks) ---
+# lightgbm
+# matplotlib
+# jupyter
 ```
 
-## API Contract
+Uncomment a section only when you need it, then run `pip install -r requirements.txt` again.
 
-### GET `/api/risk?day=0..6`
-Returns predicted risk grid cells for the given day.
+Tips:
+- Once everything works on the ML engineer's machine, run `pip freeze > requirements.txt` to lock the exact versions, so it installs the same way for everyone and on the hosting service.
+- `torch` and `transformers` are big (several GB with the model). Free hosting tiers may not have enough memory to run them, so test early. If it doesn't fit, run the photo check on a host with more memory (Hugging Face Spaces has more on its free tier, as far as I know) or run the backend from a laptop for the demo.
+- `osmnx` (OpenStreetMap data) is deliberately left out because it pulls in many heavy dependencies. Run it once in a notebook, save the water-body and construction-site locations to `data/`, and let the API read the saved file.
 
-### GET `/api/reports`
-Returns all community reports sorted by newest first.
+## Build order
 
-### POST `/api/reports` (multipart)
-Submit a new breeding site report with photo, GPS coordinates, and optional note.
+1. **Backend:** get a "hello world" API running, then make `GET /risk` return a hand-written sample file and share the URL. This unblocks the frontend.
+2. **Frontend:** map with mock data, then legend, cell pop-up and day slider.
+3. **Backend:** reports endpoints, then the photo check.
+4. **Frontend:** report form and dashboard.
+5. **Backend:** replace sample `risk.json` with real output from `make_risk_json.py`, and re-run it (from the API, as a background task) after every new report or status change so the map reflects it.
+6. **Everyone:** test on a phone, record a backup demo video, rehearse the pitch.
 
-### PATCH `/api/reports/:id`
-Update a report's status (`assigned`, `cleared`) and optionally assign a team.
+## Git rules for the team
 
-### GET `/api/model-info`
-Returns model version, training date, data sources, and performance metrics.
+- `main` must always run. Never push broken code to it.
+- Work on your own branch (`git checkout -b frontend-map`) and merge into `main` when it works.
+- Only edit files in your own folder. If you need a change elsewhere, ask.
+- `git pull` before you start. Commit small and often: `git add . && git commit -m "what you did" && git push`.
 
-## Open Source Libraries
+## Do not commit
 
-- [Next.js](https://nextjs.org/) — MIT
-- [React](https://react.dev/) — MIT
-- [Tailwind CSS](https://tailwindcss.com/) — MIT
-- [Leaflet](https://leafletjs.com/) — BSD-2-Clause
-- [react-leaflet](https://react-leaflet.js.org/) — Hippocratic-2.1
-- [TanStack Query](https://tanstack.com/query) — MIT
+Add this to `.gitignore`:
+```
+node_modules/
+.next/
+.env
+.env.local
+__pycache__/
+venv/
+backend/uploads/
+notebooks/data/
+*.pt
+*.ckpt
+.DS_Store
+```
+Also keep out of the repo: the raw survey CSV (it has contact details), API keys, and photos of people's faces. Only aggregated survey results belong in the proposal.
 
-## License
+## Hackathon rules to remember (from the T&C)
 
-University hackathon project — NyahMuk.
+- **Log every AI tool you use** in `docs/ai-usage-log.md`: which tool, what for, and the date. Material AI use must be disclosed.
+- **Build from scratch.** Do not reuse code from earlier projects or coursework. List the open-source libraries used.
+- **SDP owns the submission and everything developed for it.** Check with your lecturer about IP before registering.
+- **Only put measured numbers in the proposal.** Mark assumptions as assumptions, and label any sample reports as demo data.
+- **Present yourselves as students on a course project**, not as representatives of Sime Darby Property.
+
+## Key dates
+
+- 21 Oct 2026: registration closes
+- 23 Oct 2026: proposal submission
+- 24 to 28 Oct 2026: judging, Top 10 announced 28 Oct
+- 2 to 6 Nov: mentoring sprint (Top 10 only)
+- 11 Nov: final submission; 14 Nov: Top 10 pitch day
+- 3 Dec: final presentation and awards
