@@ -1,3 +1,8 @@
-fastapi
-uvicorn[standard]
-requests
+fastapi>=0.110
+uvicorn[standard]>=0.29
+python-multipart>=0.0.9
+pillow>=10.0
+tzdata            # needed for the Asia/Kuala_Lumpur timezone on Windows
+ultralytics>=8.3  # the two YOLO models (installs PyTorch, big download)
+httpx        # only needed for python test_backend.py
+pi-heif      # Ultralytics installed this automatically; this avoids the warning

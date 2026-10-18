@@ -1,0 +1,24 @@
+{
+  "model_version": "v0.1-rules",
+  "last_trained": "2026-10-18",
+  "data_sources": [
+    "VisText-Mosquito (Mendeley Data): photos of breeding-site objects, used to train the object detector",
+    "Stagnant Water and Wet Surface Dataset (Mendeley Data): used to train the visible-water detector",
+    "Open-Meteo: rainfall, temperature and humidity (past 7 days and 7-day forecast)",
+    "OpenStreetMap: water bodies, drains and construction sites near each cell",
+    "Citizen reports submitted through this app",
+    "Team's own Malaysian test photos"
+  ],
+  "metrics": [
+    {"name": "Object detector (Model 1) mAP50", "value": 0.917, "note": "Test split of VisText-Mosquito, 5 classes (tyre, drain inlet, vase/flowerpot, bottle, coconut shell). Same photo source as training, so likely optimistic for Malaysian scenes."},
+    {"name": "Object detector (Model 1) precision / recall", "value": "0.872 / 0.880", "note": "Same test split."},
+    {"name": "Visible-water detector (Model 2) mAP50", "value": 0.225, "note": "Low because water has no clear edges and the labels are overlapping boxes. Used only as soft evidence that water may be present."},
+    {"name": "Risk map", "value": "rule-based", "note": "Not trained or validated. Weights are assumptions from Aedes ecology. Confidence is never above medium until compared with iDengue hotspots."},
+    {"name": "Malaysian photo test", "value": "pending", "note": "Run evaluate_my_photos.py and fill this in."}
+  ],
+  "limitations": [
+    "Detects possible breeding sites, not larvae or mosquitoes. An officer must verify.",
+    "No bucket or drum class yet.",
+    "Visible water is not proof that water is stagnant."
+  ]
+}
