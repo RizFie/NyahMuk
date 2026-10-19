@@ -5,6 +5,7 @@ import Link from 'next/link';
 import ReportForm from '@/components/ReportForm';
 import BottomNav from '@/components/BottomNav';
 import { isMockMode } from '@/lib/config';
+import ApiModeBadge from '@/components/ApiModeBadge';
 
 export default function ReportPage() {
   const [formKey, setFormKey] = useState(0);
@@ -108,6 +109,7 @@ export default function ReportPage() {
       </main>
 
       <BottomNav activePage="report" />
+      <ApiModeBadge />
     </div>
   );
 }

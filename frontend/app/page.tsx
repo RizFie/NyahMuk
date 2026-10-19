@@ -11,6 +11,7 @@ import Legend from '@/components/Legend';
 import DaySlider from '@/components/DaySlider';
 import PriorityList from '@/components/PriorityList';
 import ReportsTable from '@/components/ReportsTable';
+import ApiModeBadge from '@/components/ApiModeBadge';
 import { fetchReports, fetchRisk, patchReport } from '@/lib/api';
 import type { Report, RiskResponse } from '@/lib/types';
 
@@ -84,6 +85,7 @@ export default function DashboardPage() {
         </main>
       </div>
       <BottomNav activePage="dashboard" />
+      <ApiModeBadge />
     </div>
   );
 }

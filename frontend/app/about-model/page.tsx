@@ -7,6 +7,7 @@ import Topbar from '@/components/Topbar';
 import BottomNav from '@/components/BottomNav';
 import { fetchModelInfo } from '@/lib/api';
 import type { ModelInfo } from '@/lib/types';
+import ApiModeBadge from '@/components/ApiModeBadge';
 
 export default function AboutModelPage() {
   const { data, isLoading, isError } = useQuery<ModelInfo>({
@@ -136,6 +137,7 @@ export default function AboutModelPage() {
       </main>
 
       <BottomNav activePage="dashboard" />
+      <ApiModeBadge />
     </div>
   );
 }

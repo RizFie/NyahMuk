@@ -15,12 +15,11 @@ export const CELL_SIZE_LAT = 0.005;
 export const CELL_SIZE_LNG = 0.005;
 export const GRID_ORIGIN: [number, number] = [3.0574, 101.4034];
 
-/** Whether to use built-in mock API (when NEXT_PUBLIC_API_BASE_URL is empty) */
+/** Whether the built-in mock API is active. */
 export function isMockMode(): boolean {
-  return !process.env.NEXT_PUBLIC_API_BASE_URL;
+  return process.env.NEXT_PUBLIC_API_MODE !== "real";
 }
 
-/** Resolved API base URL – falls back to relative path for mock routes */
-export function getApiBase(): string {
-  return process.env.NEXT_PUBLIC_API_BASE_URL || "";
+export function apiMode(): "real" | "mock" {
+  return isMockMode() ? "mock" : "real";
 }

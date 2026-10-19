@@ -2,9 +2,8 @@
 
 import type { RiskResponse, Report, ModelInfo, ReportPatch } from "./types";
 
-// Keep browser requests same-origin so HTTPS clients never call localhost or
-// an insecure backend directly. Next.js proxies these paths when configured.
-const endpoint = (path: string) => `/api${path}`;
+const endpoint = (path: string) =>
+  process.env.NEXT_PUBLIC_API_MODE === "real" ? `/backend${path}` : `/api${path}`;
 
 /** Fetch risk grid for a given day (0-6) */
 export async function fetchRisk(day: number = 0): Promise<RiskResponse> {
