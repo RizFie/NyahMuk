@@ -5,6 +5,16 @@ import ReportMap from './ReportMap';
 import { submitReport } from '@/lib/api';
 import type { Report } from '@/lib/types';
 
+const AI_LABELS: Record<Report['ai_check']['label'], string> = {
+  tyre: 'Tyre',
+  drain: 'Drain',
+  flowerpot: 'Flower pot',
+  bottle: 'Bottle',
+  coconut_shell: 'Coconut shell',
+  none: 'No object',
+  unknown: 'Unknown object',
+};
+
 export default function ReportForm() {
   const [photo, setPhoto] = useState<File | null>(null);
   const [photoPreviewUrl, setPhotoPreviewUrl] = useState<string | null>(null);
@@ -213,7 +223,7 @@ export default function ReportForm() {
           accept="image/*"
           capture="environment"
           required
-          className="w-full max-w-full text-[#a1b9b0] text-[11px]"
+          className="w-full max-w-full text-[#a1b9b0] text-[11px] max-[680px]:text-base"
           onChange={handlePhotoChange}
         />
         {photoPreviewUrl && (
@@ -237,7 +247,7 @@ export default function ReportForm() {
         <textarea
           id="description"
           name="description"
-          placeholder="Describe the standing water, container, or suspected larvae..."
+          placeholder="Describe the standing water or container..."
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           className="w-full min-w-0 min-h-[105px] p-3 border border-[#2b4940] rounded-[10px] outline-none bg-[#0d1e1b] text-[#e7f5ef] text-[13px] resize-y focus:border-[#13845f] focus:shadow-[0_0_0_2px_#13845f22] placeholder:text-[#a1b9b0] placeholder:opacity-80 max-[680px]:text-base"
@@ -248,8 +258,8 @@ export default function ReportForm() {
       <div className="flex items-start gap-[10px] mt-[10px] p-3 border border-[#2b4940] rounded-[11px] bg-[#1a332d]">
         <span className="shrink-0">🛡️</span>
         <p className="m-0 text-[#a1b9b0] text-[11px] leading-[1.6]">
-          Do not touch suspected larvae or enter unsafe areas. Only take photos from a
-          safe location. Do not photograph people&apos;s faces.
+          Do not touch suspected breeding sites or enter unsafe areas. Only take photos
+          from a safe location. Do not photograph people&apos;s faces.
         </p>
       </div>
 
@@ -281,14 +291,21 @@ export default function ReportForm() {
         >
           ✓ Report submitted successfully!
           <br />
-          <span className="font-normal">
-            AI check:{' '}
-            {submitResult.ai_check?.is_standing_water &&
-            submitResult.ai_check?.confidence > 0.7
-              ? `Looks like standing water, ${Math.round(
-                  submitResult.ai_check.confidence * 100
-                )}% confident`
-              : 'Needs review — our model could not confirm standing water with high confidence'}
+          <span className="mt-1 block font-normal">
+            {AI_LABELS[submitResult.ai_check.label]} detected
+            {submitResult.ai_check.is_standing_water && (
+              <span className="ml-2 inline-flex rounded-full bg-[#1b3d30] px-2 py-1 text-[10px] font-bold text-[#55d7a0]">
+                Water visible
+              </span>
+            )}
+            <span className="ml-2">
+              · {Math.round(submitResult.ai_check.confidence * 100)}% confidence
+            </span>
+            {(submitResult.ai_check.label === 'unknown' ||
+              submitResult.ai_check.label === 'none') &&
+              !submitResult.ai_check.is_standing_water && (
+                <span className="mt-1 block font-bold text-[#f4bd50]">Needs review</span>
+              )}
           </span>
         </div>
       )}

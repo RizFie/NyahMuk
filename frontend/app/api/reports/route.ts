@@ -49,10 +49,19 @@ export async function POST(request: NextRequest) {
 
   const newId = `r_${Math.random().toString(16).slice(2, 10)}`;
 
-  // AI check: randomly choose standing water or not (80% yes), confidence 0.65-0.95
-  const isStandingWater = Math.random() < 0.8;
-  const confidence = Math.round((0.65 + Math.random() * 0.3) * 100) / 100;
-  const label = isStandingWater ? "drain" : "none";
+  const aiCheck = /\breview\b/i.test(note)
+    ? {
+        label: "unknown" as const,
+        is_standing_water: false,
+        confidence: 0,
+      }
+    : {
+        label: (["tyre", "drain", "flowerpot"] as const)[
+          Math.floor(Math.random() * 3)
+        ],
+        is_standing_water: true,
+        confidence: Math.round((0.6 + Math.random() * 0.35) * 100) / 100,
+      };
 
   const newReport: Report = {
     id: newId,
@@ -64,11 +73,7 @@ export async function POST(request: NextRequest) {
     created_at: new Date().toISOString(),
     status: "new",
     assigned_to: null,
-    ai_check: {
-      label,
-      is_standing_water: isStandingWater,
-      confidence,
-    },
+    ai_check: aiCheck,
     cell_id: computeCellId(lat, lng),
   };
 

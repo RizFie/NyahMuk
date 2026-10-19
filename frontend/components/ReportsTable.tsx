@@ -116,7 +116,10 @@ export function ReportsTable({
                     className={`p-[13px_11px] ${borderBottomClass} text-xs text-[#e7f5ef] max-w-[200px]`}
                     title={report.note || undefined}
                   >
-                    {formatIssue(report.note)}
+                    <span className="block">{formatIssue(report.note)}</span>
+                    <span className="mt-1 block text-[10px] text-[#a1b9b0]">
+                      AI: {report.ai_check.label}
+                    </span>
                   </td>
 
                   {/* Reported */}
@@ -141,6 +144,13 @@ export function ReportsTable({
                           ({report.assigned_to})
                         </span>
                       )}
+                      {(report.ai_check.label === 'unknown' ||
+                        report.ai_check.label === 'none') &&
+                        !report.ai_check.is_standing_water && (
+                          <span className="rounded-full bg-[#43351c] px-[6px] py-[3px] text-[9px] font-extrabold text-[#f4bd50]">
+                            Needs review
+                          </span>
+                        )}
                     </div>
                   </td>
 
