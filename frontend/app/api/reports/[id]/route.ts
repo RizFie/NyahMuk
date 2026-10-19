@@ -11,9 +11,8 @@ export async function GET(
   context: RouteContext
 ) {
   const params = await context.params;
-  const id = parseInt(params.id, 10);
-
-  if (isNaN(id)) {
+  const id = params.id;
+  if (!id) {
     return NextResponse.json({ error: "Invalid report ID" }, { status: 400 });
   }
 
@@ -30,9 +29,8 @@ export async function PATCH(
   context: RouteContext
 ) {
   const params = await context.params;
-  const id = parseInt(params.id, 10);
-
-  if (isNaN(id)) {
+  const id = params.id;
+  if (!id) {
     return NextResponse.json({ error: "Invalid report ID" }, { status: 400 });
   }
 
@@ -44,6 +42,9 @@ export async function PATCH(
   try {
     const body = (await request.json()) as ReportPatch;
 
+    if (body.status !== undefined && !["new", "assigned", "cleared"].includes(body.status)) {
+      return NextResponse.json({ error: "Invalid report status" }, { status: 400 });
+    }
     if (body.status !== undefined) {
       report.status = body.status;
     }

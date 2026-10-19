@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { TOWNSHIP_CENTRE, GRID_ROWS, GRID_COLS, CELL_SIZE_LAT, CELL_SIZE_LNG } from "@/lib/config";
+import { GRID_ORIGIN, GRID_ROWS, GRID_COLS, CELL_SIZE_LAT, CELL_SIZE_LNG } from "@/lib/config";
 import type { RiskResponse, RiskCell, GeoJSONPolygon } from "@/lib/types";
 
 // Available risk factor codes
@@ -131,18 +131,16 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  const [centreLat, centreLng] = TOWNSHIP_CENTRE;
-  const northLat = centreLat + (GRID_ROWS / 2) * CELL_SIZE_LAT;
-  const westLng = centreLng - (GRID_COLS / 2) * CELL_SIZE_LNG;
+  const [southLat, westLng] = GRID_ORIGIN;
 
   const cells: RiskCell[] = [];
 
   for (let r = 0; r < GRID_ROWS; r++) {
     for (let c = 0; c < GRID_COLS; c++) {
-      const cellId = `cell-${String(r).padStart(2, "0")}-${String(c).padStart(2, "0")}`;
+      const cellId = `${String.fromCharCode(65 + c)}${r + 1}`;
 
-      const topLat = northLat - r * CELL_SIZE_LAT;
-      const bottomLat = topLat - CELL_SIZE_LAT;
+      const bottomLat = southLat + r * CELL_SIZE_LAT;
+      const topLat = bottomLat + CELL_SIZE_LAT;
       const leftLng = westLng + c * CELL_SIZE_LNG;
       const rightLng = leftLng + CELL_SIZE_LNG;
 

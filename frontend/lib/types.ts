@@ -27,14 +27,14 @@ export interface RiskResponse {
 
 /** AI check result on a report photo */
 export interface AICheck {
-  label: string;
+  label: "tyre" | "drain" | "flowerpot" | "bottle" | "coconut_shell" | "none" | "unknown";
   is_standing_water: boolean;
   confidence: number;
 }
 
 /** A community report */
 export interface Report {
-  id: number;
+  id: string;
   lat: number;
   lng: number;
   photo_url: string;
@@ -65,5 +65,5 @@ export interface ModelInfo {
 /** Body for PATCH /reports/{id} */
 export interface ReportPatch {
   status: "new" | "assigned" | "cleared";
-  assigned_to?: string;
+  assigned_to?: string | null;
 }

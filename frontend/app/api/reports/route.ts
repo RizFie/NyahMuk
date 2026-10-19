@@ -40,23 +40,25 @@ export async function POST(request: NextRequest) {
       if (body.location_label !== undefined) locationLabel = String(body.location_label);
     }
   } catch {
-    // In case of parsing error, continue with default values
+    return NextResponse.json({ error: "Invalid report payload" }, { status: 400 });
   }
 
-  // ID is max existing id + 1 (or 15 minimum if empty)
-  const maxExistingId = reports.reduce((max, r) => Math.max(max, r.id), 14);
-  const newId = maxExistingId + 1;
+  if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+    return NextResponse.json({ error: "lat and lng must be valid numbers" }, { status: 400 });
+  }
+
+  const newId = `r_${Math.random().toString(16).slice(2, 10)}`;
 
   // AI check: randomly choose standing water or not (80% yes), confidence 0.65-0.95
   const isStandingWater = Math.random() < 0.8;
   const confidence = Math.round((0.65 + Math.random() * 0.3) * 100) / 100;
-  const label = isStandingWater ? "Standing water detected" : "No standing water detected";
+  const label = isStandingWater ? "drain" : "none";
 
   const newReport: Report = {
     id: newId,
     lat,
     lng,
-    photo_url: "/api/reports/photo",
+    photo_url: "https://images.example.com/nyahmuk/report-upload.jpg",
     note,
     location_label: locationLabel || undefined,
     created_at: new Date().toISOString(),

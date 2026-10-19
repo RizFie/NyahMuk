@@ -13,6 +13,7 @@ import {
 } from '@/lib/risk';
 import { TOWNSHIP_CENTRE } from '@/lib/config';
 import { relativeTime } from '@/lib/time';
+import { formatReportId } from '@/lib/report-id';
 
 export interface RiskMapInnerProps {
   cells: RiskCell[];
@@ -89,7 +90,7 @@ export function RiskMapInner({
           STATUS_MARKER_COLOURS[report.status] || '#19885d';
         const label =
           report.location_label ||
-          (report.cell_id ? `Cell ${report.cell_id}` : `Report #${report.id}`);
+          (report.cell_id ? `${formatReportId(report.id)} · Cell ${report.cell_id}` : formatReportId(report.id));
         const marker = L.circleMarker([report.lat, report.lng], {
           radius: 6,
           fillColor: markerColor,

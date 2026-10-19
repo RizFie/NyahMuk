@@ -3,12 +3,13 @@
 import React, { useState } from 'react';
 import type { Report } from '@/lib/types';
 import relativeTime from '@/lib/time';
+import { formatReportId } from '@/lib/report-id';
 import StatusTag from './StatusTag';
 
 export interface ReportsTableProps {
   reports: Report[];
-  onAssign: (id: number, team: string) => void;
-  onClear: (id: number) => void;
+  onAssign: (id: string, team: string) => void;
+  onClear: (id: string) => void;
 }
 
 const STATUS_CONFIG: Record<
@@ -31,10 +32,10 @@ export function ReportsTable({
   onAssign,
   onClear,
 }: ReportsTableProps) {
-  const [assigningId, setAssigningId] = useState<number | null>(null);
+  const [assigningId, setAssigningId] = useState<string | null>(null);
   const [teamInput, setTeamInput] = useState<string>('');
 
-  const submitAssign = (reportId: number) => {
+  const submitAssign = (reportId: string) => {
     const trimmed = teamInput.trim();
     if (trimmed) {
       onAssign(reportId, trimmed);
@@ -99,7 +100,7 @@ export function ReportsTable({
                   <td
                     className={`p-[13px_11px] ${borderBottomClass} text-xs font-mono font-medium text-[#e7f5ef]`}
                   >
-                    #NM-{report.id.toString().padStart(3, '0')}
+                    {formatReportId(report.id)}
                   </td>
 
                   {/* Location */}

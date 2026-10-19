@@ -2,6 +2,7 @@
 
 import React, { useMemo } from 'react';
 import type { Report, RiskCell } from '@/lib/types';
+import { formatReportId } from '@/lib/report-id';
 import StatusTag from './StatusTag';
 
 export interface PriorityListProps {
@@ -82,8 +83,8 @@ export default function PriorityList({ reports = [], cells = [] }: PriorityListP
       }
 
       const title = report.location_label
-        ? `${report.location_label} · Cell ${report.cell_id}`
-        : `Cell ${report.cell_id} · ${report.note || 'Community Report'}`;
+        ? `${formatReportId(report.id)} · ${report.location_label} · Cell ${report.cell_id}`
+        : `${formatReportId(report.id)} · Cell ${report.cell_id} · ${report.note || 'Community Report'}`;
 
       const factors = cell?.top_factors?.length
         ? cell.top_factors.slice(0, 2).join(', ')
