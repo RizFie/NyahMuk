@@ -1,10 +1,10 @@
 // API client functions for NyahMuk
 
-import { getApiBase } from "./config";
 import type { RiskResponse, Report, ModelInfo, ReportPatch } from "./types";
 
-const base = () => getApiBase();
-const endpoint = (path: string) => `${base()}${base() ? path : `/api${path}`}`;
+// Keep browser requests same-origin so HTTPS clients never call localhost or
+// an insecure backend directly. Next.js proxies these paths when configured.
+const endpoint = (path: string) => `/api${path}`;
 
 /** Fetch risk grid for a given day (0-6) */
 export async function fetchRisk(day: number = 0): Promise<RiskResponse> {

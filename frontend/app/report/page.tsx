@@ -1,14 +1,16 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import ReportForm from '@/components/ReportForm';
 import BottomNav from '@/components/BottomNav';
 import { isMockMode } from '@/lib/config';
 
 export default function ReportPage() {
+  const [formKey, setFormKey] = useState(0);
+
   return (
-    <div className="min-h-screen bg-[#0d1e1b] pb-[30px] max-[680px]:pb-[76px]">
+    <div className="min-h-dvh bg-[#0d1e1b] pb-[30px] max-[680px]:pb-[calc(76px+env(safe-area-inset-bottom,0px))]">
       {/* Sticky header */}
       <header
         className="topbar report-header sticky top-0 z-10 flex items-center justify-between gap-4 border-b border-[#2b4940] bg-[#142925]"
@@ -65,7 +67,9 @@ export default function ReportPage() {
 
         {/* Form panel */}
         <section className="min-w-0 p-[21px] border border-[#2b4940] rounded-[17px] bg-[#142925] max-[680px]:p-[16px_13px] max-[380px]:p-[13px_10px]">
-          <ReportForm />
+          <div className="relative z-0">
+            <ReportForm key={formKey} onClear={() => setFormKey((value) => value + 1)} />
+          </div>
           {isMockMode() && (
             <p className="mt-[13px] text-[#a1b9b0] text-[11px] leading-[1.6]">
               Prototype only. Reports are not sent to a real authority or database.

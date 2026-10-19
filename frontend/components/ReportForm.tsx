@@ -15,7 +15,11 @@ const AI_LABELS: Record<Report['ai_check']['label'], string> = {
   unknown: 'Unknown object',
 };
 
-export default function ReportForm() {
+interface ReportFormProps {
+  onClear?: () => void;
+}
+
+export default function ReportForm({ onClear }: ReportFormProps) {
   const [photo, setPhoto] = useState<File | null>(null);
   const [photoPreviewUrl, setPhotoPreviewUrl] = useState<string | null>(null);
   const [gpsState, setGpsState] = useState<'idle' | 'loading' | 'success' | 'error' | 'manual'>('idle');
@@ -24,6 +28,7 @@ export default function ReportForm() {
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [submitResult, setSubmitResult] = useState<Report | null>(null);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const successRef = useRef<HTMLDivElement>(null);
@@ -93,6 +98,9 @@ export default function ReportForm() {
 
   // Clear all form state
   const handleClear = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
     if (photoPreviewUrl) {
       URL.revokeObjectURL(photoPreviewUrl);
     }
@@ -104,9 +112,8 @@ export default function ReportForm() {
     setSubmitting(false);
     setSubmitted(false);
     setSubmitResult(null);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
+    setSubmitError(null);
+    onClear?.();
   };
 
   // Submit form data
@@ -115,6 +122,7 @@ export default function ReportForm() {
     if (!photo || !gpsCoords || submitting) return;
 
     setSubmitting(true);
+    setSubmitError(null);
     try {
       const formData = new FormData();
       formData.append('photo', photo);
@@ -130,7 +138,7 @@ export default function ReportForm() {
       }, 100);
     } catch (err) {
       console.error('Failed to submit report:', err);
-      alert('Failed to submit report. Please try again.');
+      setSubmitError('Failed to submit report. Please try again.');
     } finally {
       setSubmitting(false);
     }
@@ -267,7 +275,7 @@ export default function ReportForm() {
       <div className="grid grid-cols-[1fr_1.5fr] gap-[9px] mt-5 max-[680px]:grid-cols-1">
         <button
           type="button"
-          className="btn secondary inline-flex items-center justify-center gap-[7px] min-h-[44px] p-[11px_9px] border border-[#2b4940] rounded-[10px] bg-[#1a332d] text-[#e7f5ef] text-xs font-[750] hover:border-[#13845f] hover:bg-[#203e34] transition max-[680px]:w-full max-[680px]:min-h-[45px] max-[680px]:text-[13px] max-[680px]:order-2 cursor-pointer"
+          className="btn secondary inline-flex touch-manipulation items-center justify-center gap-[7px] min-h-[44px] p-[11px_9px] border border-[#2b4940] rounded-[10px] bg-[#1a332d] text-[#e7f5ef] text-xs font-[750] hover:border-[#13845f] hover:bg-[#203e34] transition max-[680px]:w-full max-[680px]:min-h-[45px] max-[680px]:text-[13px] max-[680px]:order-2 cursor-pointer"
           onClick={handleClear}
         >
           Clear form
@@ -280,6 +288,12 @@ export default function ReportForm() {
           {submitting ? 'Submitting...' : 'Submit report →'}
         </button>
       </div>
+
+      {submitError && (
+        <div className="mt-3 rounded-[10px] border border-[#df4b4b] bg-[#482929] p-[13px] text-xs text-[#ff9999]" role="alert">
+          {submitError}
+        </div>
+      )}
 
       {/* Success message */}
       {submitted && submitResult && (

@@ -15,7 +15,7 @@ export default function AboutModelPage() {
   });
 
   return (
-    <div className="app min-h-screen bg-[#0d1e1b] text-[#e7f5ef] pb-20">
+    <div className="app min-h-dvh bg-[#0d1e1b] text-[#e7f5ef] pb-20">
       <Topbar />
 
       <main className="w-full max-w-[620px] mx-auto p-7 max-[680px]:px-4 max-[680px]:py-5">

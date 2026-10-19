@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
+import SectionNavLink from './SectionNavLink';
 
 export interface SidebarProps {
   activeSection?: string;
@@ -36,21 +37,6 @@ export default function Sidebar({ activeSection }: SidebarProps) {
     return cleanActive === cleanId || cleanActive === cleanHref;
   };
 
-  const handleSmoothScroll = (
-    e: React.MouseEvent<HTMLAnchorElement>,
-    href: string
-  ) => {
-    if (typeof window !== 'undefined') {
-      const id = href.replace(/^#/, '');
-      const element = document.getElementById(id);
-      if (element) {
-        e.preventDefault();
-        element.scrollIntoView({ behavior: 'smooth' });
-        window.history.pushState(null, '', href);
-      }
-    }
-  };
-
   return (
     <aside className="p-[24px_15px] bg-[#0a2821] text-[#e8fff5] max-[680px]:hidden flex flex-col justify-between h-full min-h-screen">
       <div>
@@ -61,10 +47,10 @@ export default function Sidebar({ activeSection }: SidebarProps) {
           {HASH_NAV_ITEMS.map((item) => {
             const active = isItemActive(item.id, item.href);
             return (
-              <a
+              <SectionNavLink
                 key={item.id}
-                href={item.href}
-                onClick={(e) => handleSmoothScroll(e, item.href)}
+                id={item.id}
+                href={`/#${item.id}`}
                 className={`nav flex items-center gap-3 w-full my-1 p-[13px_14px] rounded-xl no-underline text-[13px] font-semibold transition-colors ${
                   active
                     ? 'bg-[#197e5c] text-white'
@@ -75,7 +61,7 @@ export default function Sidebar({ activeSection }: SidebarProps) {
                   {item.icon}
                 </span>
                 <span>{item.label}</span>
-              </a>
+              </SectionNavLink>
             );
           })}
 

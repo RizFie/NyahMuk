@@ -5,6 +5,41 @@ A web platform that predicts mosquito breeding hotspots in a township, lets resi
 Built for the Sime Darby Property University Hackathon 2026, "Township of Tomorrow".
 Proposed track: People, Community wellbeing (confirm before submission).
 
+## Frontend quick start
+
+From `frontend/`:
+
+```bash
+npm install
+npm run dev
+```
+
+Open <http://localhost:3000>. The local frontend uses
+`NEXT_PUBLIC_API_BASE_URL=http://localhost:8000` from `.env.local` by default.
+Browser requests remain same-origin at `/api/*`; Next.js proxies them to the
+configured backend. This avoids browser mixed-content/CORS issues when the
+frontend is opened over HTTPS on a phone. To use the built-in mock handlers,
+leave that variable empty. The mock routes are `/api/risk`,
+`/api/model-info`, and `/api/reports`.
+
+When testing from another device, bind the Next.js dev server to the host
+machine's network interface and make sure the backend is running on the same
+host. For example:
+
+```bash
+npm run dev -- --hostname 0.0.0.0
+```
+
+Build and serve the production app with:
+
+```bash
+npm run build
+npm run start
+```
+
+Frontend libraries: Next.js App Router, React, TypeScript, Tailwind CSS v4,
+`next/font` (Inter), TanStack Query, Leaflet, and react-leaflet.
+
 ## Team
 
 | Role | Name | Works in |

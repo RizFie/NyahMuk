@@ -7,6 +7,7 @@ from datetime import datetime
 from io import BytesIO
 from pathlib import Path
 from typing import Literal, Optional
+from collections import Counter
 
 from fastapi import FastAPI, File, Form, HTTPException, Query, Request, UploadFile
 from fastapi.exceptions import RequestValidationError
@@ -131,3 +132,9 @@ def update_report(report_id: str, body: PatchBody, request: Request):
         _save_reports(items)
         risk.rebuild(items)
     return _public(r, request)
+
+
+d = json.load(open("data/risk.json"))["days"]["0"]
+print(Counter(c["risk_level"] for c in d), sorted({c["risk_score"] for c in d})[:3])
+w = json.load(open("data/weather_cache.json")); i = w["today_index"]
+print("rain last 7 days (mm):", sum(x["precip"] or 0 for x in w["daily"][i-6:i+1]))

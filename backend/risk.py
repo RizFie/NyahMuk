@@ -28,7 +28,7 @@ REPORT_DAYS = 14             # reports older than this stop counting
 WEIGHTS = {"base": 0.10, "rain": 0.30, "temp": 0.10, "humidity": 0.10,
            "water": 0.10, "construction": 0.10}
 REPORT_STEP, REPORT_MAX = 0.10, 0.30     # each nearby report adds 0.10, up to 0.30
-LEVELS = (0.35, 0.60)                    # < 0.35 low, < 0.60 medium, else high
+LEVELS = (0.35, 0.65)                    # < 0.35 low, < 0.60 medium, else high
 
 
 def _read(name, default=None):
@@ -159,7 +159,10 @@ def build_risk(grid, weather, features, reports, now=None):
         cells = []
         for f in grid["features"]:
             cid = f["properties"]["cell_id"]
-            col, row = cell_rc(cid)
+            rc = cell_rc(cid)
+            if rc is None:
+                continue
+            col, row = rc
             parts, codes = {"base": WEIGHTS["base"]}, []
             if wx and wx["rain7"] is not None:
                 parts["rain"] = WEIGHTS["rain"] * min(wx["rain7"] / RAIN_MAX_MM, 1.0)

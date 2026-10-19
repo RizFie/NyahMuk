@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { StableLeafletMap } from './StableLeafletMap';
@@ -31,12 +31,16 @@ export function RiskMapInner({
   className = '',
 }: RiskMapInnerProps) {
   // Filter valid reports with numeric lat/lng
-  const validReports = reports.filter(
-    (r) =>
-      typeof r?.lat === 'number' &&
-      !isNaN(r.lat) &&
-      typeof r?.lng === 'number' &&
-      !isNaN(r.lng)
+  const validReports = useMemo(
+    () =>
+      reports.filter(
+        (r) =>
+          typeof r?.lat === 'number' &&
+          !isNaN(r.lat) &&
+          typeof r?.lng === 'number' &&
+          !isNaN(r.lng)
+      ),
+    [reports]
   );
   const renderLayers = useCallback(
     () => {
