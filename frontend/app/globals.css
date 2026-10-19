@@ -1,7 +1,66 @@
 @import 'tailwindcss';
 
+@theme {
+  --color-bg: #0d1e1b;
+  --color-surface: #142925;
+  --color-surface-2: #1a332d;
+  --color-text: #e7f5ef;
+  --color-muted: #a1b9b0;
+  --color-border: #2b4940;
+  --color-green: #13845f;
+  --color-green-2: #d8f3e6;
+  --color-green-dark: #073d31;
+  --color-red: #df4b4b;
+  --color-amber: #d9951c;
+  --radius-panel: 17px;
+  --radius-control: 10px;
+  --radius-card: 14px;
+  --breakpoint-tablet: 1100px;
+  --breakpoint-mobile: 680px;
+}
+
+:root {
+  color-scheme: dark;
+}
+
 html {
   scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background: #0d1e1b;
+  color: #e7f5ef;
+  font-family: var(--font-inter), 'Segoe UI', Arial, sans-serif;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button {
+  cursor: pointer;
+}
+
+.map-placeholder {
+  display: grid;
+  position: relative;
+  place-items: center;
+  height: 330px;
+  overflow: hidden;
+  border: 1px solid #2b4940;
+  border-radius: 13px;
+  background: #1a332d;
+  color: #a1b9b0;
+  font-size: 12px;
 }
 
 /* Leaflet popup dark theme override */
