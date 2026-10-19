@@ -24,15 +24,15 @@ nyahmuk/
 │
 ├── frontend/              # Next.js app
 │   ├── app/
-│   │   ├── page.tsx           # risk map (home)
+│   │   ├── page.tsx           # dashboard: risk map, priority areas, reports table (home)
 │   │   ├── report/page.tsx    # citizen report form
-│   │   ├── dashboard/page.tsx # management action board
 │   │   ├── about-model/page.tsx
-│   │   └── api/               # mock API (used until the real backend is ready)
+│   │   └── api/               # mock API (used when NEXT_PUBLIC_API_BASE_URL is empty)
 │   ├── components/        # RiskMap, ReportForm, Navbar, etc.
 │   ├── lib/
 │   │   ├── api.ts             # functions that call the backend
 │   │   ├── types.ts           # types matching the API contract below
+│   │   ├── config.ts, risk.ts, time.ts  # township + map centre, risk colours and factor text, relative time
 │   │   └── mock-data.ts       # fake data for the mock API
 │   ├── public/
 │   └── .env.local.example     # NEXT_PUBLIC_API_BASE_URL=
@@ -127,7 +127,12 @@ npm run dev
 ```
 Open http://localhost:3000.
 
-To use the real backend, set `NEXT_PUBLIC_API_BASE_URL=http://localhost:8000` in `frontend/.env.local`.
+To use the real backend, set `NEXT_PUBLIC_API_BASE_URL=http://localhost:8000` in `frontend/.env.local` and restart (the value is baked in at build time).
+
+**Testing on a phone (same Wi-Fi)**
+- Start the backend with `uvicorn main:app --host 0.0.0.0 --port 8000` and allow Python through the firewall.
+- Set `NEXT_PUBLIC_API_BASE_URL=http://<laptop-IP>:8000`, then run `npm run build && npm run start` (not `npm run dev`, which is slow and can hang on phones), and open `http://<laptop-IP>:3000`.
+- Phones only give GPS to HTTPS pages, so over plain HTTP use the tap-to-drop-pin fallback on `/report`. HTTPS is on hold for now.
 
 ### `backend/requirements.txt`
 
@@ -156,6 +161,35 @@ Tips:
 4. **Frontend:** report form and dashboard.
 5. **Backend:** run `make_risk_json.py` daily for fresh weather. The API rebuilds the map by itself after every new report or status change.
 6. **Everyone:** test on a phone, record a backup demo video, rehearse the pitch.
+
+## Status and open items
+
+Update this table whenever something changes. It is how the two sides see what the other is waiting for.
+
+**Frontend (done)**
+
+| Item | Status |
+|---|---|
+| Stages 1 to 4: shell, risk map, report form, about page, real backend hookup | Done |
+| Mobile fixes: Clear form, "Reports" nav freeze, cross-origin dev access | Done |
+| HTTPS so phones can give GPS automatically | On hold (tap-to-drop-pin works) |
+| Final check against the design at 1280px, 768px, 375px, then `frontend/README.md` | To do |
+
+**Waiting on backend (in priority order)**
+
+| # | Item | Why it matters |
+|---|---|---|
+| 1 | Share `models/model1_best.pt` and `models/model2_water_best.pt` (not in git, so use Drive or USB) and run `pip install ultralytics` | Without them every photo returns `unknown`, so the frontend can't show real AI results or reports raising the map |
+| 2 | In `risk.py` set `LEVELS = (0.35, 0.65)`, then rerun `python make_risk_json.py` and `python test_backend.py` | 7-day rain was 103 mm, so weather alone gives every cell 0.60 and the whole map is "high". With the change, weather alone caps at "medium" and "high" needs local evidence |
+| 3 | Run `evaluate_my_photos.py` on our own Malaysian photos, set `NYAHMUK_CONF_OBJECT` and `NYAHMUK_CONF_WATER`, and put the measured results in `data/model_info.json` | Real numbers are our best evidence. Only put measured results there |
+| 4 | Commit `data/grid.geojson`, `data/model_info.json` and `data/reports.json`. Label the 3 sample reports as demo data, or remove them (and update `test_backend.py`) | The T&C ban misleading information, and sample reports raise risk scores |
+| 5 | Write the model and dataset sources and licences in `docs/ai-usage-log.md` (Ultralytics is AGPL-3.0 as far as I know; check with the lecturer) | T&C: AI-use disclosure and rights warranties |
+| 6 | Demo-day runbook: start command, and run `make_risk_json.py` that morning for fresh weather | Avoids surprises on the day |
+| 7 | Optional: run `make_osm_features.py` and check it doesn't flag too many cells | Makes `near_water_body` and `near_construction_site` informative |
+
+**Everyone**
+
+- Test the whole flow on a phone, record a backup demo video, and rehearse the pitch.
 
 ## Git rules for the team
 
