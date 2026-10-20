@@ -1,4 +1,4 @@
-# NyahMuk: Prediction and Prevention of Mosquitoes
+# NyahMuk: Prediction and Prevention of Mosquitoes.
 
 A web platform that predicts mosquito breeding hotspots in a township, lets residents report possible breeding sites with a photo and GPS, and gives management a prioritised action list.
 
