@@ -21,19 +21,24 @@ export function ReportMapInner({
     () => {
       const layers = L.layerGroup();
       if (selectedLocation) {
-        layers.addLayer(
-          L.circleMarker([selectedLocation.lat, selectedLocation.lng], {
-            radius: 8,
-            fillColor: '#13845f',
-            color: 'white',
-            weight: 3,
-            fillOpacity: 1,
-          })
-        );
+        const marker = L.marker([selectedLocation.lat, selectedLocation.lng], {
+          draggable: true,
+          icon: L.divIcon({
+            className: 'report-location-marker',
+            html: '<span style="display:block;width:16px;height:16px;border:3px solid white;border-radius:50%;background:#13845f;box-shadow:0 1px 5px rgba(0,0,0,.5)"></span>',
+            iconSize: [22, 22],
+            iconAnchor: [11, 11],
+          }),
+        });
+        marker.on('dragend', () => {
+          const position = marker.getLatLng();
+          onLocationSelect(position.lat, position.lng);
+        });
+        layers.addLayer(marker);
       }
       return layers;
     },
-    [selectedLocation]
+    [onLocationSelect, selectedLocation]
   );
 
   return (

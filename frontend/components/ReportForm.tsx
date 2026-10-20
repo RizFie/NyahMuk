@@ -4,6 +4,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import ReportMap from './ReportMap';
 import { submitReport } from '@/lib/api';
 import type { Report } from '@/lib/types';
+import { getPhotoLocation } from '@/lib/photoLocation';
+import { TOWNSHIP_BOUNDS } from '@/lib/config';
 
 const AI_LABELS: Record<Report['ai_check']['label'], string> = {
   tyre: 'Tyre',
@@ -24,6 +26,7 @@ export default function ReportForm({ onClear }: ReportFormProps) {
   const [photoPreviewUrl, setPhotoPreviewUrl] = useState<string | null>(null);
   const [gpsState, setGpsState] = useState<'idle' | 'loading' | 'success' | 'error' | 'manual'>('idle');
   const [gpsCoords, setGpsCoords] = useState<{ lat: number; lng: number; accuracy?: number } | null>(null);
+  const [locationSource, setLocationSource] = useState<'photo' | 'device' | 'pin' | null>(null);
   const [description, setDescription] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -32,6 +35,7 @@ export default function ReportForm({ onClear }: ReportFormProps) {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const successRef = useRef<HTMLDivElement>(null);
+  const locationRequestRef = useRef(0);
 
   // Clean up object URL when component unmounts or photo changes
   useEffect(() => {
@@ -42,26 +46,26 @@ export default function ReportForm({ onClear }: ReportFormProps) {
     };
   }, [photoPreviewUrl]);
 
-  // Request GPS acquisition via navigator.geolocation
-  const requestGPS = () => {
+  const requestDeviceLocation = (requestId: number) => {
     if (typeof window === 'undefined' || !navigator.geolocation) {
-      setGpsState('error');
+      if (requestId === locationRequestRef.current) setGpsState('error');
       return;
     }
 
     setGpsState('loading');
     navigator.geolocation.getCurrentPosition(
       (position) => {
-        setGpsCoords({
-          lat: position.coords.latitude,
-          lng: position.coords.longitude,
-          accuracy: position.coords.accuracy,
-        });
+        if (requestId !== locationRequestRef.current) return;
+        setGpsCoords({ lat: position.coords.latitude, lng: position.coords.longitude, accuracy: position.coords.accuracy });
+        setLocationSource('device');
         setGpsState('success');
       },
       (error) => {
         console.warn('Geolocation acquisition error:', error);
-        setGpsState('error');
+        if (requestId === locationRequestRef.current) {
+          setLocationSource(null);
+          setGpsState('error');
+        }
       },
       {
         enableHighAccuracy: true,
@@ -71,7 +75,29 @@ export default function ReportForm({ onClear }: ReportFormProps) {
     );
   };
 
-  // Handle photo selection and auto-call requestGPS
+  const requestGPS = () => {
+    const requestId = ++locationRequestRef.current;
+    requestDeviceLocation(requestId);
+  };
+
+  const detectPhotoLocation = async (file: File) => {
+    const requestId = ++locationRequestRef.current;
+    setGpsState('loading');
+    setGpsCoords(null);
+    setLocationSource(null);
+
+    const location = await getPhotoLocation(file);
+    if (requestId !== locationRequestRef.current) return;
+    if (location) {
+      setGpsCoords(location);
+      setLocationSource('photo');
+      setGpsState('success');
+      return;
+    }
+
+    requestDeviceLocation(requestId);
+  };
+
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -87,12 +113,12 @@ export default function ReportForm({ onClear }: ReportFormProps) {
 
     setPhoto(file);
     setPhotoPreviewUrl(URL.createObjectURL(file));
-    requestGPS();
+    void detectPhotoLocation(file);
   };
 
-  // Handle map click fallback selection
   const handleMapSelect = (lat: number, lng: number) => {
     setGpsCoords({ lat, lng });
+    setLocationSource('pin');
     setGpsState('manual');
   };
 
@@ -108,6 +134,8 @@ export default function ReportForm({ onClear }: ReportFormProps) {
     setPhotoPreviewUrl(null);
     setGpsState('idle');
     setGpsCoords(null);
+    setLocationSource(null);
+    locationRequestRef.current += 1;
     setDescription('');
     setSubmitting(false);
     setSubmitted(false);
@@ -158,12 +186,13 @@ export default function ReportForm({ onClear }: ReportFormProps) {
 
   if (gpsState === 'loading') {
     gpsStatusText = 'Getting coordinates...';
-    gpsSubText = 'Please allow location access.';
+    gpsSubText = 'Checking your photo, then your device location.';
   } else if (gpsState === 'success' && gpsCoords) {
     gpsStatusText = `${gpsCoords.lat.toFixed(6)}, ${gpsCoords.lng.toFixed(6)}`;
-    gpsSubText = `GPS accuracy: approximately ${
-      gpsCoords.accuracy ? Math.round(gpsCoords.accuracy) : 10
-    } m`;
+    gpsSubText =
+      locationSource === 'photo'
+        ? 'Location read from photo metadata.'
+        : `GPS accuracy: approximately ${gpsCoords.accuracy ? Math.round(gpsCoords.accuracy) : 10} m`;
   } else if (gpsState === 'error') {
     gpsStatusText = 'Unable to get GPS';
     gpsSubText = 'Allow location access and try again, or tap the map below.';
@@ -171,6 +200,21 @@ export default function ReportForm({ onClear }: ReportFormProps) {
     gpsStatusText = `${gpsCoords.lat.toFixed(6)}, ${gpsCoords.lng.toFixed(6)}`;
     gpsSubText = 'Location set from map';
   }
+
+  const locationSourceLabel =
+    locationSource === 'photo'
+      ? 'Location from photo'
+      : locationSource === 'device'
+      ? 'Location from your device'
+      : locationSource === 'pin'
+      ? 'Location from dropped pin'
+      : null;
+  const isOutsideTownship =
+    gpsCoords !== null &&
+    (gpsCoords.lat < TOWNSHIP_BOUNDS.minLat ||
+      gpsCoords.lat > TOWNSHIP_BOUNDS.maxLat ||
+      gpsCoords.lng < TOWNSHIP_BOUNDS.minLng ||
+      gpsCoords.lng > TOWNSHIP_BOUNDS.maxLng);
 
   return (
     <form onSubmit={handleSubmit}>
@@ -181,10 +225,15 @@ export default function ReportForm({ onClear }: ReportFormProps) {
           className={`gpsbox flex items-center gap-[11px] p-[13px] border rounded-[11px] bg-[#1a332d] ${borderColorClass}`}
         >
           <span className="text-[20px] shrink-0">📍</span>
-          <div className="min-w-0 flex-1">
+          <div className="min-w-0 flex-1" aria-live="polite">
             <strong className="block text-xs" id="gpsText">
               {gpsStatusText}
             </strong>
+            {locationSourceLabel && (
+              <span className="mt-1 inline-block text-[10px] font-bold text-[#20b785]">
+                {locationSourceLabel}
+              </span>
+            )}
             <small className="block mt-1 text-[#a1b9b0] text-[11px] leading-[1.5]">
               {gpsSubText}
             </small>
@@ -199,14 +248,20 @@ export default function ReportForm({ onClear }: ReportFormProps) {
           </button>
         </div>
 
-        {/* Fallback map - shown when GPS fails */}
-        {gpsState === 'error' && (
+        {(gpsCoords || gpsState === 'error') && (
           <div className="mt-2">
             <p className="text-[#a1b9b0] text-[11px] mb-2">
-              Tap the map to set your location:
+              {gpsCoords
+                ? 'Drag the marker to adjust your location, or tap the map to set it:'
+                : 'Tap the map to set your location:'}
             </p>
             <ReportMap onLocationSelect={handleMapSelect} selectedLocation={gpsCoords} />
           </div>
+        )}
+        {isOutsideTownship && (
+          <p className="mt-2 rounded-[10px] border border-[#d9951c] bg-[#3d321b] p-2 text-[11px] leading-[1.5] text-[#f4bd50]" role="alert">
+            This location is outside the township area. Drag the marker or check the photo.
+          </p>
         )}
       </div>
 
@@ -222,7 +277,7 @@ export default function ReportForm({ onClear }: ReportFormProps) {
         <span className="text-[25px]">📸</span>
         <b>Take a photo of the suspected site</b>
         <small className="text-[#a1b9b0] text-[11px]">
-          GPS coordinates will be requested after capture.
+          We read the location from your photo when it has one.
         </small>
         <input
           id="photo"

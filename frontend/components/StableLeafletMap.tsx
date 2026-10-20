@@ -25,6 +25,7 @@ export function StableLeafletMap({
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
   const layersRef = useRef<L.LayerGroup | null>(null);
+  const clickHandlerRef = useRef<((event: L.LeafletMouseEvent) => void) | null>(null);
   const initialOptionsRef = useRef({ center, zoom, onMapClick, renderLayers });
 
   useEffect(() => {
@@ -48,6 +49,7 @@ export function StableLeafletMap({
           initialOnMapClick(event.latlng.lat, event.latlng.lng)
       : undefined;
     if (handleClick) map.on('click', handleClick);
+    clickHandlerRef.current = handleClick ?? null;
 
     mapRef.current = map;
     layersRef.current = layers;
@@ -56,12 +58,39 @@ export function StableLeafletMap({
     return () => {
       cancelAnimationFrame(invalidateFrame);
       if (handleClick) map.off('click', handleClick);
+      clickHandlerRef.current = null;
       layers.clearLayers();
       map.remove();
       mapRef.current = null;
       layersRef.current = null;
     };
   }, []);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || onMapClick === initialOptionsRef.current.onMapClick) return;
+
+    if (clickHandlerRef.current) {
+      map.off('click', clickHandlerRef.current);
+    }
+    const handleClick = (event: L.LeafletMouseEvent) =>
+      onMapClick?.(event.latlng.lat, event.latlng.lng);
+    map.on('click', handleClick);
+    clickHandlerRef.current = handleClick;
+
+    return () => {
+      map.off('click', handleClick);
+      if (clickHandlerRef.current === handleClick) {
+        clickHandlerRef.current = null;
+      }
+    };
+  }, [onMapClick]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+    map.setView(center, map.getZoom(), { animate: false });
+  }, [center]);
 
   useEffect(() => {
     const map = mapRef.current;

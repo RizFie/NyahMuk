@@ -15,6 +15,13 @@ export const CELL_SIZE_LAT = 0.005;
 export const CELL_SIZE_LNG = 0.005;
 export const GRID_ORIGIN: [number, number] = [3.0574, 101.4034];
 
+export const TOWNSHIP_BOUNDS = {
+  minLat: 3.0574,
+  maxLat: 3.1174,
+  minLng: 101.4034,
+  maxLng: 101.4634,
+} as const;
+
 /** Whether the built-in mock API is active. */
 export function isMockMode(): boolean {
   return process.env.NEXT_PUBLIC_API_MODE !== "real";
