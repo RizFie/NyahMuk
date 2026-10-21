@@ -33,7 +33,8 @@ export default function ReportForm({ onClear }: ReportFormProps) {
   const [submitResult, setSubmitResult] = useState<Report | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
+  const galleryInputRef = useRef<HTMLInputElement>(null);
   const successRef = useRef<HTMLDivElement>(null);
   const locationRequestRef = useRef(0);
 
@@ -98,8 +99,9 @@ export default function ReportForm({ onClear }: ReportFormProps) {
     requestDeviceLocation(requestId);
   };
 
-  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const onPhotoSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+    e.target.value = '';
     if (!file) return;
 
     if (!file.type.startsWith('image/')) {
@@ -124,9 +126,8 @@ export default function ReportForm({ onClear }: ReportFormProps) {
 
   // Clear all form state
   const handleClear = () => {
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
+    if (cameraInputRef.current) cameraInputRef.current.value = '';
+    if (galleryInputRef.current) galleryInputRef.current.value = '';
     if (photoPreviewUrl) {
       URL.revokeObjectURL(photoPreviewUrl);
     }
@@ -270,24 +271,46 @@ export default function ReportForm({ onClear }: ReportFormProps) {
         <span>📷</span> Photo evidence
       </div>
 
-      <label
-        className="upload flex flex-col items-center gap-[7px] w-full p-[23px_12px] border-[1.5px] border-dashed border-[#2b4940] rounded-xl bg-[#1a332d] text-center cursor-pointer hover:border-[#13845f]"
-        htmlFor="photo"
-      >
+      <div className="upload flex flex-col items-center gap-[7px] w-full p-[23px_12px] border-[1.5px] border-dashed border-[#2b4940] rounded-xl bg-[#1a332d] text-center hover:border-[#13845f]">
         <span className="text-[25px]">📸</span>
         <b>Take a photo of the suspected site</b>
         <small className="text-[#a1b9b0] text-[11px]">
           We read the location from your photo when it has one.
         </small>
+        <div className="grid grid-cols-2 gap-2 w-full mt-2 max-[380px]:grid-cols-1">
+          <button
+            type="button"
+            aria-label="Take photo"
+            onClick={() => cameraInputRef.current?.click()}
+            className="inline-flex items-center justify-center min-h-[44px] px-3 py-2 border border-[#13845f] rounded-[10px] bg-[#13845f] text-white text-xs font-[750] hover:bg-[#169a6d] transition cursor-pointer"
+          >
+            📷 Take photo
+          </button>
+          <button
+            type="button"
+            aria-label="Upload photo from gallery"
+            onClick={() => galleryInputRef.current?.click()}
+            className="inline-flex items-center justify-center min-h-[44px] px-3 py-2 border border-[#2b4940] rounded-[10px] bg-[#1a332d] text-[#e7f5ef] text-xs font-[750] hover:border-[#13845f] hover:bg-[#203e34] transition cursor-pointer"
+          >
+            🖼️ Upload from gallery
+          </button>
+        </div>
         <input
-          id="photo"
-          ref={fileInputRef}
+          ref={cameraInputRef}
           type="file"
           accept="image/*"
           capture="environment"
-          required
-          className="w-full max-w-full text-[#a1b9b0] text-[11px] max-[680px]:text-base"
-          onChange={handlePhotoChange}
+          className="hidden"
+          onChange={onPhotoSelected}
+          aria-label="Take photo"
+        />
+        <input
+          ref={galleryInputRef}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={onPhotoSelected}
+          aria-label="Upload photo from gallery"
         />
         {photoPreviewUrl && (
           <img
@@ -296,7 +319,7 @@ export default function ReportForm({ onClear }: ReportFormProps) {
             className="w-auto max-w-full max-h-[220px] mt-[10px] rounded-[10px] object-contain"
           />
         )}
-      </label>
+      </div>
 
       {/* Report description section */}
       <div className="form-section flex items-center gap-2 mt-[22px] mb-[14px] text-[13px] font-[800]">
