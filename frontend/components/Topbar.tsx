@@ -3,6 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { PLACE_NAME, isMockMode } from '@/lib/config';
+import { useViewMode } from '@/lib/view-mode';
 
 export interface TopbarProps {
   isMock?: boolean;
@@ -11,6 +12,7 @@ export interface TopbarProps {
 export default function Topbar({ isMock }: TopbarProps = {}) {
   // Use prop if provided, otherwise check config mock mode
   const showMock = isMock !== undefined ? isMock : isMockMode();
+  const [viewMode, setViewMode] = useViewMode();
 
   return (
     <header className="topbar flex items-center justify-between gap-4 py-[17px] px-[26px] bg-[#142925] border-b border-[#2b4940] max-[680px]:py-[13px] max-[680px]:px-[15px] max-[680px]:items-start">
@@ -30,6 +32,35 @@ export default function Topbar({ isMock }: TopbarProps = {}) {
       </Link>
 
       <div className="top-actions flex items-center gap-[10px] max-[680px]:flex-col max-[680px]:items-end max-[680px]:gap-[5px]">
+        <div className="flex flex-col items-end gap-1">
+          <div className="inline-flex overflow-hidden rounded-full border border-[#2b4940] bg-[#1a332d] p-0.5 text-[10px] font-bold">
+            <button
+              type="button"
+              aria-pressed={viewMode === 'management'}
+              onClick={() => setViewMode('management')}
+              className={`min-h-[32px] px-3 transition max-[680px]:min-h-[28px] max-[680px]:px-2 ${
+                viewMode === 'management'
+                  ? 'rounded-full bg-[#13845f] text-white'
+                  : 'text-[#a1b9b0] hover:text-[#e7f5ef]'
+              }`}
+            >
+              Management view
+            </button>
+            <button
+              type="button"
+              aria-pressed={viewMode === 'resident'}
+              onClick={() => setViewMode('resident')}
+              className={`min-h-[32px] px-3 transition max-[680px]:min-h-[28px] max-[680px]:px-2 ${
+                viewMode === 'resident'
+                  ? 'rounded-full bg-[#13845f] text-white'
+                  : 'text-[#a1b9b0] hover:text-[#e7f5ef]'
+              }`}
+            >
+              Resident view
+            </button>
+          </div>
+          <span className="text-[9px] text-[#a1b9b0]">Demo switch only. A real deployment uses login.</span>
+        </div>
         <div className="pill px-[13px] py-2 border border-[#2b4940] rounded-full text-[#a1b9b0] text-xs whitespace-nowrap max-[680px]:px-2 max-[680px]:py-[6px] max-[680px]:text-[10px]">
           📍 {PLACE_NAME}
         </div>

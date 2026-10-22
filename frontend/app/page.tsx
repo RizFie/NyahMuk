@@ -14,9 +14,12 @@ import ReportsTable from '@/components/ReportsTable';
 import ApiModeBadge from '@/components/ApiModeBadge';
 import { fetchReports, fetchRisk, patchReport } from '@/lib/api';
 import type { Report, RiskResponse } from '@/lib/types';
+import { useOwnReportIds, useViewMode } from '@/lib/view-mode';
 
 export default function DashboardPage() {
   const [selectedDay, setSelectedDay] = useState(0);
+  const [viewMode] = useViewMode();
+  const ownReportIds = useOwnReportIds();
   const queryClient = useQueryClient();
   const riskQuery = useQuery<RiskResponse>({
     queryKey: ['risk', selectedDay],
@@ -33,12 +36,16 @@ export default function DashboardPage() {
   });
 
   const reports = reportsQuery.data ?? [];
+  const residentView = viewMode === 'resident';
+  const visibleReports = residentView
+    ? reports.filter((report) => ownReportIds.includes(report.id))
+    : reports;
   const cells = riskQuery.data?.cells ?? [];
-  const openReports = useMemo(() => reports.filter((report) => report.status !== 'cleared'), [reports]);
+  const openReports = useMemo(() => visibleReports.filter((report) => report.status !== 'cleared'), [visibleReports]);
   const loading = riskQuery.isLoading || reportsQuery.isLoading;
   const highRisk = cells.filter((cell) => cell.risk_level === 'high').length;
-  const assigned = reports.filter((report) => report.status === 'assigned').length;
-  const cleared = reports.filter((report) => report.status === 'cleared').length;
+  const assigned = visibleReports.filter((report) => report.status === 'assigned').length;
+  const cleared = visibleReports.filter((report) => report.status === 'cleared').length;
 
   return (
     <div className="min-h-dvh bg-bg text-text">
@@ -50,7 +57,7 @@ export default function DashboardPage() {
             <div>
               <div className="text-[11px] font-extrabold uppercase tracking-[1.5px] text-[#20b785]">Township overview</div>
               <h1 className="my-[5px] text-[30px] font-extrabold tracking-[-1px] max-[680px]:text-[26px]">Risk Dashboard</h1>
-              <p className="m-0 text-sm leading-[1.5] text-muted max-[680px]:text-xs">Monitor potential mosquito breeding hotspots and community activity.</p>
+              <p className="m-0 text-sm leading-[1.5] text-muted max-[680px]:text-xs">{residentView ? 'View the risk map and track your submitted reports.' : 'Monitor potential mosquito breeding hotspots and community activity.'}</p>
             </div>
           </header>
 
@@ -58,29 +65,29 @@ export default function DashboardPage() {
             <div className="mb-[18px] rounded-panel border border-[#df4b4b] bg-surface p-[18px] text-sm text-[#ff7777]">Unable to load dashboard data. Please try again.</div>
           )}
 
-          <section className="mb-[18px] grid grid-cols-4 gap-[14px] max-[1100px]:grid-cols-2 max-[680px]:gap-[9px]">
+          {!residentView && <section className="mb-[18px] grid grid-cols-4 gap-[14px] max-[1100px]:grid-cols-2 max-[680px]:gap-[9px]">
             <StatCard title="High-risk zones" icon="⚠" value={loading ? '—' : String(highRisk).padStart(2, '0')} footer={<><span className="font-bold text-[#ff7777]">Needs attention</span> · Priority inspection</>} />
             <StatCard title="Reports received" icon="▤" value={loading ? '—' : String(reports.length).padStart(2, '0')} footer={<><span className="font-bold text-[#37c894]">↑ Community activity</span> · This month</>} />
             <StatCard title="Sites under review" icon="⌕" value={loading ? '—' : String(assigned).padStart(2, '0')} footer="Awaiting verification" />
             <StatCard title="Resolved reports" icon="✓" value={loading ? '—' : String(cleared).padStart(2, '0')} footer={<><span className="font-bold text-[#37c894]">{reports.length ? Math.round((cleared / reports.length) * 100) : 0}% resolved</span> · This month</>} />
-          </section>
+          </section>}
 
           <section className="grid grid-cols-[minmax(0,1.6fr)_minmax(280px,1fr)] gap-4 max-[1100px]:grid-cols-1 max-[680px]:block">
             <div className="min-w-0 scroll-mt-[90px] rounded-panel border border-border bg-surface p-[18px] max-[680px]:p-[14px]" id="risk-map">
               <PanelTitle title="Predicted Risk Map" />
-              <RiskMap cells={cells} reports={reports} modelVersion={riskQuery.data?.model_version ?? ''} generatedAt={riskQuery.data?.generated_at ?? ''} />
+              <RiskMap cells={cells} reports={visibleReports} modelVersion={riskQuery.data?.model_version ?? ''} generatedAt={riskQuery.data?.generated_at ?? ''} />
               <Legend />
               <DaySlider value={selectedDay} onChange={setSelectedDay} />
             </div>
-            <div className="min-w-0 scroll-mt-[90px] rounded-panel border border-border bg-surface p-[18px] max-[680px]:mt-[13px] max-[680px]:p-[14px]" id="priority">
+            {!residentView && <div className="min-w-0 scroll-mt-[90px] rounded-panel border border-border bg-surface p-[18px] max-[680px]:mt-[13px] max-[680px]:p-[14px]" id="priority">
               <PanelTitle title="Priority Areas" aside="Inspection list" />
               <PriorityList reports={openReports} cells={cells} />
-            </div>
+            </div>}
           </section>
 
           <section className="mt-4 min-w-0 scroll-mt-[90px] rounded-panel border border-border bg-surface p-[18px] max-[680px]:mb-[10px] max-[680px]:p-[14px]" id="reports">
-            <PanelTitle title="Latest Community Reports" aside="Recent activity" />
-            <ReportsTable reports={reports} onAssign={(id, team) => updateReport.mutate({ id, patch: { status: 'assigned', assigned_to: team } })} onClear={(id) => updateReport.mutate({ id, patch: { status: 'cleared' } })} />
+            <PanelTitle title={residentView ? 'Your report status' : 'Latest Community Reports'} aside={residentView ? 'Private to this demo session' : 'Recent activity'} />
+            <ReportsTable reports={visibleReports} residentView={residentView} onAssign={(id, team) => updateReport.mutate({ id, patch: { status: 'assigned', assigned_to: team } })} onClear={(id) => updateReport.mutate({ id, patch: { status: 'cleared' } })} />
           </section>
         </main>
       </div>

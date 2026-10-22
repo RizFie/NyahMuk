@@ -10,6 +10,7 @@ export interface ReportsTableProps {
   reports: Report[];
   onAssign: (id: string, team: string) => void;
   onClear: (id: string) => void;
+  residentView?: boolean;
 }
 
 const STATUS_CONFIG: Record<
@@ -31,6 +32,7 @@ export function ReportsTable({
   reports = [],
   onAssign,
   onClear,
+  residentView = false,
 }: ReportsTableProps) {
   const [assigningId, setAssigningId] = useState<string | null>(null);
   const [teamInput, setTeamInput] = useState<string>('');
@@ -46,34 +48,30 @@ export function ReportsTable({
 
   return (
     <div className="overflow-x-auto w-full">
-      <table className="w-full min-w-[500px] sm:min-w-[560px] border-collapse text-left">
+      <table className={`w-full border-collapse text-left ${residentView ? 'min-w-[280px]' : 'min-w-[500px] sm:min-w-[560px]'}`}>
         <thead>
           <tr>
             <th className="p-[11px] border-b border-[#2b4940] text-[#a1b9b0] text-[10px] font-bold tracking-[0.8px] uppercase">
               Report ID
             </th>
-            <th className="p-[11px] border-b border-[#2b4940] text-[#a1b9b0] text-[10px] font-bold tracking-[0.8px] uppercase">
-              Location
-            </th>
-            <th className="p-[11px] border-b border-[#2b4940] text-[#a1b9b0] text-[10px] font-bold tracking-[0.8px] uppercase">
-              Issue
-            </th>
-            <th className="p-[11px] border-b border-[#2b4940] text-[#a1b9b0] text-[10px] font-bold tracking-[0.8px] uppercase">
-              Reported
-            </th>
+            {!residentView && (
+              <>
+                <th className="p-[11px] border-b border-[#2b4940] text-[#a1b9b0] text-[10px] font-bold tracking-[0.8px] uppercase">Location</th>
+                <th className="p-[11px] border-b border-[#2b4940] text-[#a1b9b0] text-[10px] font-bold tracking-[0.8px] uppercase">Issue</th>
+                <th className="p-[11px] border-b border-[#2b4940] text-[#a1b9b0] text-[10px] font-bold tracking-[0.8px] uppercase">Reported</th>
+              </>
+            )}
             <th className="p-[11px] border-b border-[#2b4940] text-[#a1b9b0] text-[10px] font-bold tracking-[0.8px] uppercase">
               Status
             </th>
-            <th className="p-[11px] border-b border-[#2b4940] text-[#a1b9b0] text-[10px] font-bold tracking-[0.8px] uppercase">
-              Actions
-            </th>
+            {!residentView && <th className="p-[11px] border-b border-[#2b4940] text-[#a1b9b0] text-[10px] font-bold tracking-[0.8px] uppercase">Actions</th>}
           </tr>
         </thead>
         <tbody>
           {reports.length === 0 ? (
             <tr>
               <td
-                colSpan={6}
+                colSpan={residentView ? 2 : 6}
                 className="p-[13px_11px] text-center text-[#a1b9b0] text-xs"
               >
                 No reports found
@@ -103,31 +101,20 @@ export function ReportsTable({
                     {formatReportId(report.id)}
                   </td>
 
-                  {/* Location */}
-                  <td
-                    className={`p-[13px_11px] ${borderBottomClass} text-xs text-[#e7f5ef]`}
-                  >
-                    {report.location_label ||
-                      (report.cell_id ? `Cell ${report.cell_id}` : '—')}
-                  </td>
-
-                  {/* Issue */}
-                  <td
-                    className={`p-[13px_11px] ${borderBottomClass} text-xs text-[#e7f5ef] max-w-[200px]`}
-                    title={report.note || undefined}
-                  >
-                    <span className="block">{formatIssue(report.note)}</span>
-                    <span className="mt-1 block text-[10px] text-[#a1b9b0]">
-                      AI: {report.ai_check.label}
-                    </span>
-                  </td>
-
-                  {/* Reported */}
-                  <td
-                    className={`p-[13px_11px] ${borderBottomClass} text-xs text-[#a1b9b0] whitespace-nowrap`}
-                  >
-                    {report.created_at ? relativeTime(report.created_at) : '—'}
-                  </td>
+                  {!residentView && (
+                    <>
+                      <td className={`p-[13px_11px] ${borderBottomClass} text-xs text-[#e7f5ef]`}>
+                        {report.location_label || (report.cell_id ? `Cell ${report.cell_id}` : '—')}
+                      </td>
+                      <td className={`p-[13px_11px] ${borderBottomClass} text-xs text-[#e7f5ef] max-w-[200px]`} title={report.note || undefined}>
+                        <span className="block">{formatIssue(report.note)}</span>
+                        <span className="mt-1 block text-[10px] text-[#a1b9b0]">AI: {report.ai_check.label}</span>
+                      </td>
+                      <td className={`p-[13px_11px] ${borderBottomClass} text-xs text-[#a1b9b0] whitespace-nowrap`}>
+                        {report.created_at ? relativeTime(report.created_at) : '—'}
+                      </td>
+                    </>
+                  )}
 
                   {/* Status */}
                   <td
@@ -154,10 +141,7 @@ export function ReportsTable({
                     </div>
                   </td>
 
-                  {/* Actions */}
-                  <td
-                    className={`p-[13px_11px] ${borderBottomClass} text-xs whitespace-nowrap`}
-                  >
+                  {!residentView && <td className={`p-[13px_11px] ${borderBottomClass} text-xs whitespace-nowrap`}>
                     <div className="flex items-center gap-2 flex-wrap">
                       {report.status === 'new' && (
                         <>
@@ -223,7 +207,7 @@ export function ReportsTable({
                         <span className="text-[10px] text-[#a1b9b0] italic">—</span>
                       )}
                     </div>
-                  </td>
+                  </td>}
                 </tr>
               );
             })

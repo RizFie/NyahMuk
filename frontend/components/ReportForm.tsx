@@ -6,6 +6,7 @@ import { submitReport } from '@/lib/api';
 import type { Report } from '@/lib/types';
 import { getPhotoLocation } from '@/lib/photoLocation';
 import { TOWNSHIP_BOUNDS } from '@/lib/config';
+import { rememberOwnReportId } from '@/lib/view-mode';
 
 const AI_LABELS: Record<Report['ai_check']['label'], string> = {
   tyre: 'Tyre',
@@ -160,6 +161,7 @@ export default function ReportForm({ onClear }: ReportFormProps) {
       formData.append('note', description);
 
       const result = await submitReport(formData);
+      rememberOwnReportId(result.id);
       setSubmitResult(result);
       setSubmitted(true);
       setTimeout(() => {
