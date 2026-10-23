@@ -4,9 +4,10 @@ __pycache__/
 uploads/*
 !uploads/sample_*.jpg
 !uploads/.gitkeep
-models/*.pt
 data/weather_cache.json
 my_photos_eval.csv
+models/*.pt
+
 
 # Environments
 .venv/
