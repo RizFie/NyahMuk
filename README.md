@@ -1,4 +1,4 @@
-# NyahMuk: Prediction and Prevention of Mosquitoes.
+# NyahMuk: Prediction and Prevention of Mosquitoes
 
 A web platform that predicts mosquito breeding hotspots in a township, lets residents report possible breeding sites with a photo and GPS, and gives management a prioritised action list.
 
@@ -9,9 +9,9 @@ Proposed track: People, Community wellbeing (confirm before submission).
 
 | Role | Name | Works in |
 |---|---|---|
-| Frontend + integration | [name] | `frontend/` |
-| ML + backend | [name] | `backend/` |
-| Research, survey, pitch | [names] | `docs/` |
+| Frontend + integration | MOHAMAD HARIZ RAFIE BIN ABD RAHIM | `frontend/` |
+| ML + backend | NORAIMAN IKRAM BIN NORAMLI | `backend/` |
+| Research, survey, pitch | MUHAMMAD LOKMAN BIN ABDUL HAMID, NORHAFIZUDDIN BIN ANUAR | `docs/` |
 
 ## Folder structure
 
@@ -27,7 +27,7 @@ nyahmuk/
 │   │   ├── page.tsx           # dashboard: risk map, priority areas, reports table (home)
 │   │   ├── report/page.tsx    # citizen report form
 │   │   ├── about-model/page.tsx
-│   │   └── api/               # mock API (used when NEXT_PUBLIC_API_BASE_URL is empty)
+│   │   └── api/               # mock API (used when NEXT_PUBLIC_API_MODE is not "real")
 │   ├── components/        # RiskMap, ReportForm, Navbar, etc.
 │   ├── lib/
 │   │   ├── api.ts             # functions that call the backend
@@ -35,7 +35,7 @@ nyahmuk/
 │   │   ├── config.ts, risk.ts, time.ts  # township + map centre, risk colours and factor text, relative time
 │   │   └── mock-data.ts       # fake data for the mock API
 │   ├── public/
-│   └── .env.local.example     # NEXT_PUBLIC_API_BASE_URL=
+│   └── .env.local.example     # NEXT_PUBLIC_API_MODE=real, BACKEND_URL=http://localhost:8000
 │
 └── backend/               # Python FastAPI, kept deliberately small
     ├── main.py                # the whole API (5 endpoints)
@@ -61,7 +61,7 @@ nyahmuk/
 
 How it fits together: `make_grid.py` creates the grid once. `make_risk_json.py` fetches and caches the weather, and `risk.py` turns weather, nearby places and citizen reports into `data/risk.json` -> `main.py` serves it -> the frontend draws it on a map. A new report goes the other way: the frontend uploads a photo -> `photo_check.py` labels it -> the API saves it to `reports.json` (with its `cell_id`) and rebuilds the map straight away from the cached weather, so no internet call is needed. Status changes (assigned, cleared) rebuild it too. There is no database. The API reads and writes JSON files.
 
-## API contract (the single source of truth)
+## API contract
 
 Both sides build to these shapes. Tell each other before changing anything, then update `frontend/lib/types.ts` and `backend/main.py` to match.
 
@@ -122,17 +122,32 @@ Open http://localhost:8000/docs to see and test the API.
 ```bash
 cd frontend
 npm install
-cp .env.local.example .env.local   # leave the API URL empty to use the mock API
+cp .env.local.example .env.local   # real backend by default; delete NEXT_PUBLIC_API_MODE to use the mock API
 npm run dev
 ```
 Open http://localhost:3000.
 
-To use the real backend, set `NEXT_PUBLIC_API_BASE_URL=http://localhost:8000` in `frontend/.env.local` and restart (the value is baked in at build time).
+To use the real backend, set `NEXT_PUBLIC_API_MODE=real` and `BACKEND_URL=http://localhost:8000` in `frontend/.env.local`, then rebuild.
+
+**How the frontend reaches the backend**
+- `frontend/.env.local` has two settings: `NEXT_PUBLIC_API_MODE=real` and `BACKEND_URL=http://localhost:8000` (the backend's address as seen by the Next.js server). Delete `NEXT_PUBLIC_API_MODE` to use the built-in mock API instead.
+- In real mode the browser calls the frontend's own `/backend/...` and `next.config` forwards it to `${BACKEND_URL}/...`. In mock mode it calls `/api/...`, which are the mock handlers under `app/api`. The two paths never overlap.
+- A footer badge shows "API: real" or "API: mock". If it says mock, the data is not coming from the backend.
+- The setting is read at build time, so run `npm run build` again after changing it.
 
 **Testing on a phone (same Wi-Fi)**
-- Start the backend with `uvicorn main:app --host 0.0.0.0 --port 8000` and allow Python through the firewall.
-- Set `NEXT_PUBLIC_API_BASE_URL=http://<laptop-IP>:8000`, then run `npm run build && npm run start` (not `npm run dev`, which is slow and can hang on phones), and open `http://<laptop-IP>:3000`.
-- Phones only give GPS to HTTPS pages, so over plain HTTP use the tap-to-drop-pin fallback on `/report`. HTTPS is on hold for now.
+- Run `npm run build && npm run start` (not `npm run dev`, which is slow and can hang on phones) and open `http://<laptop-IP>:3000`. The phone only needs to reach the frontend (port 3000).
+- Check that it really reaches the backend: the footer badge says "API: real", `http://localhost:3000/backend/risk?day=0` matches `http://localhost:8000/risk?day=0`, and a report submitted from the phone appears at `http://localhost:8000/reports`.
+- Report photos must be shown through `/backend/uploads/...`, not `http://localhost:8000/...`, or they will not load on the phone.
+- Phones only give GPS to HTTPS pages. Over plain HTTP, use the tap-to-drop-pin fallback on `/report`, or use a temporary tunnel (below).
+
+**Phone with HTTPS (Cloudflare quick tunnel)**
+```bash
+# terminal 1 (backend/):  uvicorn main:app --port 8000 --proxy-headers --forwarded-allow-ips="*"
+# terminal 2 (frontend/): npm run build && npm run start
+# terminal 3:             cloudflared tunnel --url http://localhost:3000
+```
+It prints a temporary `https://....trycloudflare.com` link. Open it on the phone and allow location. The link changes every time, anyone who has it can use the app (there is no login), and it stops when the laptop sleeps. Never put it in a submission.
 
 ### `backend/requirements.txt`
 
@@ -172,7 +187,10 @@ Update this table whenever something changes. It is how the two sides see what t
 |---|---|
 | Stages 1 to 4: shell, risk map, report form, about page, real backend hookup | Done |
 | Mobile fixes: Clear form, "Reports" nav freeze, cross-origin dev access | Done |
-| HTTPS so phones can give GPS automatically | On hold (tap-to-drop-pin works) |
+| Real backend connection through the `/backend` proxy, with the "API: real / mock" badge | Done |
+| Report page: camera and gallery upload, location from photo, then device, then dropped pin | Done |
+| Resident view / Management view switch (demo only, not security) | Done |
+| HTTPS so phones can give GPS automatically | Works through a temporary Cloudflare tunnel. Not a permanent deployment |
 | Final check against the design at 1280px, 768px, 375px, then `frontend/README.md` | To do |
 
 **Waiting on backend (in priority order)**
@@ -190,6 +208,31 @@ Update this table whenever something changes. It is how the two sides see what t
 **Everyone**
 
 - Test the whole flow on a phone, record a backup demo video, and rehearse the pitch.
+
+## Built vs roadmap
+
+**Built (prototype)**
+- A 7-day breeding-risk map per grid cell. It is rule-based (rain, temperature, humidity, nearby water and construction from OpenStreetMap, and resident reports). The weights are assumptions and have not been validated against dengue data.
+- A resident report page: take a photo or upload one, with the location taken from the photo, the device or a dropped pin.
+- An AI photo check (two YOLO models) that flags a possible breeding site. It never claims larvae, and a person must verify it.
+- A management dashboard: priority list, reports table, Assign and Mark cleared. Clearing a report removes its effect on the map.
+- A Resident view / Management view switch, to show who sees what. It is a demo switch only, not security.
+- Main libraries: Next.js, Tailwind CSS, react-leaflet and Leaflet, TanStack Query and exifr (frontend); FastAPI, Pillow and Ultralytics YOLO (backend). The full list with licences is in `docs/ai-usage-log.md`.
+
+**Roadmap (not built)**
+- Login and roles for management, and a public endpoint that returns only area-level data.
+- An overdue and escalation timer that alerts estate management and the council.
+- Volunteer cleanups with a reward scheme (a proposal, subject to approval by the township developer).
+- Spam, duplicate and fake-report control.
+- Validating the risk model against public dengue hotspot data, then training a model to replace the hand-set weights.
+- More townships (run `make_grid.py` with new coordinates), and CCTV or sensor inputs.
+
+## Known limitations
+
+- There is no login. `GET /reports` returns every report, with exact coordinates and photo links, to anyone who calls it. The Resident / Management switch only changes what the screen shows.
+- The demo runs from a laptop. Reports and photos are saved on that machine only, and a tunnel link is temporary.
+- The sample reports in `data/reports.json` are demo data and stop affecting the map after 14 days. Run `python make_risk_json.py` for fresh weather before any demo or recording.
+- Location in a photo's metadata is often missing (phones and browsers strip it), so the form falls back to the device location, then a dropped pin.
 
 ## Git rules for the team
 
@@ -217,21 +260,3 @@ notebooks/data/
 .DS_Store
 ```
 Also keep out of the repo: the raw survey CSV (it has contact details), API keys, and photos of people's faces. Only aggregated survey results belong in the proposal.
-
-## Hackathon rules to remember (from the T&C)
-
-- **Log every AI tool you use** in `docs/ai-usage-log.md`: which tool, what for, and the date. Material AI use must be disclosed.
-- **Build from scratch.** Do not reuse code from earlier projects or coursework. List the open-source libraries used.
-- **SDP owns the submission and everything developed for it.** Check with your lecturer about IP before registering.
-- **List every pretrained model, dataset and library with its licence** in `docs/ai-usage-log.md`. Ultralytics YOLO is AGPL-3.0 as far as I know, so check it with your lecturer or the organisers.
-- **Only put measured numbers in the proposal.** Mark assumptions as assumptions, and label any sample reports as demo data.
-- **Present yourselves as students on a course project**, not as representatives of Sime Darby Property.
-
-## Key dates
-
-- 21 Oct 2026: registration closes
-- 23 Oct 2026: proposal submission
-- 24 to 28 Oct 2026: judging, Top 10 announced 28 Oct
-- 2 to 6 Nov: mentoring sprint (Top 10 only)
-- 11 Nov: final submission; 14 Nov: Top 10 pitch day
-- 3 Dec: final presentation and awards
