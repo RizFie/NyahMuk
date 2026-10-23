@@ -21,7 +21,6 @@ The dates above are the dates known from the project record. Any team member who
 
 - The application was built from scratch for this submission. The team did not intentionally reuse code from earlier projects or coursework.
 - SDP owns the submission and everything developed for it, subject to the applicable hackathon and institutional terms.
-- The team must check with the lecturer about intellectual-property ownership and rights before registering or submitting the project.
 - The Resident view / Management view switch is a demo presentation switch, not authentication or access control. A real deployment needs login, role-based access control and server-side filtering.
 
 ## Open-source libraries and licences
@@ -47,7 +46,7 @@ These are the direct libraries declared in `frontend/package.json` and `backend/
 | tzdata | Time-zone data | Apache-2.0 |
 | httpx | Backend tests/HTTP | BSD-3-Clause |
 | pi-heif | HEIF image support | BSD-3-Clause; verify the resolved release |
-| Ultralytics | Backend YOLO inference/training | AGPL-3.0; confirm with the lecturer/organisers before registration or distribution |
+| Ultralytics | Backend YOLO inference/training | AGPL-3.0 |
 | PyTorch | Installed/used through Ultralytics | BSD-3-Clause; verify the resolved version and its bundled components |
 
 Licence names are recorded from the projects' published metadata as understood at the time of writing. Keep the package manifests, lockfiles and licence notices with the submission, and verify the exact resolved versions before release.
@@ -74,8 +73,8 @@ These measurements are limited to the documented test splits and must not be pre
 
 | Source | Use | Licence / status |
 |---|---|---|
-| VisText-Mosquito (Mendeley Data) | Training/test data for Model 1 | Licence is not recorded in this repository; verify the exact Mendeley record licence and attribution requirements before submission. |
-| Stagnant Water and Wet Surface Dataset (Mendeley Data) | Training/test data for Model 2 | Licence is not recorded in this repository; verify the exact Mendeley record licence and attribution requirements before submission. |
+| VisText-Mosquito (Mendeley Data) | Training/test data for Model 1 | Licence: CC BY 4.0 |
+| Stagnant Water and Wet Surface Dataset (Mendeley Data) | Training/test data for Model 2 | Licence: CC BY 4.0 |
 | Open-Meteo | Rainfall, temperature and humidity inputs | Open-Meteo attribution/licence terms apply; verify the current terms and include attribution in deployment materials. |
 | OpenStreetMap | Map features such as water bodies, drains and construction sites | OpenStreetMap data is generally available under the Open Database License (ODbL); provide required attribution and verify the source/extract terms. |
 | Team's own Malaysian test photos | Local evaluation of the photo models | Team-owned or permission-based data only. Record consent and usage restrictions before publication. The evaluation result is currently pending. |
