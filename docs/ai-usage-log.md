@@ -82,3 +82,8 @@ These measurements are limited to the documented test splits and must not be pre
 | Team's own Malaysian test photos | Local evaluation of the photo models | Team-owned or permission-based data only. Record consent and usage restrictions before publication. The evaluation result is currently pending. |
 | Citizen reports submitted through the app | Demo/application inputs | Obtain consent and define retention/access rules before any real deployment. Do not treat demo records as representative research data. |
 | `backend/data/grid.geojson`, `risk.json`, and mock report records | Prototype map and UI data | Generated or demo data. The three sample reports are **demo data**, not measured community reports, and must be labelled as such or removed for a final submission. |
+
+## Dataset citations
+
+1. Faiyaz, M. F. a. S., & Jisan, M. A. (2025). MED-SAM: Mosquito Ecology Detection and Surface Segmentation Multi-class Dataset [Dataset]. In Mendeley Data. https://doi.org/10.17632/rtsfh7jh7p
+2. Bhutad, S. (2021). Dataset of Stagnant Water and Wet Surface with Annotations. Data Archiving and Networked Services (DANS), 1. https://doi.org/10.17632/y6zyrnxbfm
