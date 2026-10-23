@@ -3,7 +3,7 @@
 A web platform that predicts mosquito breeding hotspots in a township, lets residents report possible breeding sites with a photo and GPS, and gives management a prioritised action list.
 
 Built for the Sime Darby Property University Hackathon 2026, "Township of Tomorrow".
-Proposed track: People, Community wellbeing (confirm before submission).
+Proposed track: People, Community wellbeing.
 
 ## Team
 
