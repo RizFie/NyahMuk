@@ -12,7 +12,10 @@ Material AI assistance must be disclosed. The project was built from scratch for
 | 2026-10-22 | VS Code GitHub Copilot (Copilot SDK in VS Code) | Implemented the Resident view / Management view prototype, session-state switch, resident report filtering, and dashboard presentation changes. |
 | 2026-10-22 | VS Code GitHub Copilot (Copilot SDK in VS Code) | Implemented the separate camera/gallery upload controls and verified the mobile file-input behaviour. |
 | 2026-10-20 | VS Code GitHub Copilot (Copilot SDK in VS Code) | Implemented the EXIF-first photo-location flow, device-GPS fallback, dropped-pin map fallback, draggable marker and township warning. |
-| 2026-10-20 to 2026-10-23 | Claude | Planning and discussing implementation and documentation requirements. No Claude-generated code is claimed as copied from another project. |
+| 2026-10-12 to 2026-10-15 | Claude (Anthropic) | Planning for the machine-learning and backend part: turned the team's handwritten task notes into a plan, compared public datasets, and proposed the method (detect possible breeding-site objects, assess visible water, combine with weather and reports). |
+| 2026-10-15 to 2026-10-16 | Claude + Google Colab | Claude wrote the data audit and cleaning notebook. The team ran it in Google Colab: unzipped VisText-Mosquito and the Stagnant Water and Wet Surface dataset, removed corrupt and duplicate images, fixed label formats, split the data to avoid duplicates across train/valid/test, and checked results visually. The team then ran its own cross-split duplicate audit (`nyahmuk_data_cleaning_audit`). |
+| 2026-10-17 | Claude + Google Colab (T4 GPU) | Claude wrote the Model 1 training notebook. The team ran it in Colab: fine-tuned the pretrained Ultralytics YOLOv8s checkpoint (COCO) on the cleaned VisText-Mosquito detection data (3,710 train / 369 valid / 182 test images, 5 classes), 50 epochs, 640 px, batch 16, seed 42, Ultralytics 8.4.178. Evaluated on the held-out test split (mAP50 0.917). |
+| 2026-10-17 to 2026-10-18 | Claude + Google Colab (T4 GPU) | Claude wrote the Model 2 training notebooks. The team ran three experiments on the cleaned Stagnant Water and Wet Surface data: two classes for 50 epochs (test mAP50 0.212), two classes for 100 epochs (0.191), and water-only for 50 epochs at 320 px, batch 32, Ultralytics 8.4.182 (0.225). The water-only weight is the one used in the backend. |
 | Date not recorded | Google Antigravity | Initial conversion of the design references into the Next.js UI. The team must retain the tool history/output if the organisers request an audit. |
 
 The dates above are the dates known from the project record. Any team member who used another AI tool must add it here before submission.
@@ -55,8 +58,8 @@ Licence names are recorded from the projects' published metadata as understood a
 
 | Model or component | Use | Licence / provenance status |
 |---|---|---|
-| `backend/models/model1_best.pt` (Model 1) | YOLO object detector for possible breeding-site objects | Team-provided trained weight; original training checkpoint/provenance and licence are not recorded in this repository. Confirm the training data rights, base-model terms and redistribution permission with the lecturer/organisers. |
-| `backend/models/model2_water_best.pt` (Model 2) | YOLO detector for visible water/wet surfaces | Team-provided trained weight; original training checkpoint/provenance and licence are not recorded in this repository. Confirm the training data rights, base-model terms and redistribution permission with the lecturer/organisers. |
+| `backend/models/model1_best.pt` (Model 1) | YOLO object detector for possible breeding-site objects | Trained by the team in Google Colab (T4 GPU) on 2026-10-17 from the pretrained Ultralytics `yolov8s.pt` checkpoint, fine-tuned on the cleaned VisText-Mosquito detection data (CC BY 4.0 as recorded below). Notebook: `notebooks/nyahmuk_model1_training.ipynb`. Ultralytics code and pretrained weights are AGPL-3.0, so confirm redistribution terms for the derived weight with the lecturer/organisers. |
+| `backend/models/model2_water_best.pt` (Model 2) | YOLO detector for visible water/wet surfaces | Trained by the team in Google Colab (T4 GPU) on 2026-10-18 (run `model2_water_only_v2`) from the pretrained Ultralytics `yolov8s.pt` checkpoint, on the cleaned Stagnant Water and Wet Surface dataset with only the "water" class kept (CC BY 4.0 as recorded below). Notebook: `notebooks/nyahmuk_model2_v2_training.ipynb`. Same AGPL-3.0 note as Model 1. |
 | Ultralytics YOLO runtime | Loads and runs the two weights | AGPL-3.0. This is a material compliance item; obtain lecturer/organiser advice before registering, distributing or deploying the project. |
 | `backend/risk.py` rule-based risk score | Combines weather, map features and reports | Not a pretrained model and not a trained model. Its weights and thresholds are assumptions from general Aedes ecology, not measured validation. |
 
@@ -80,15 +83,3 @@ These measurements are limited to the documented test splits and must not be pre
 | Team's own Malaysian test photos | Local evaluation of the photo models | Team-owned or permission-based data only. Record consent and usage restrictions before publication. The evaluation result is currently pending. |
 | Citizen reports submitted through the app | Demo/application inputs | Obtain consent and define retention/access rules before any real deployment. Do not treat demo records as representative research data. |
 | `backend/data/grid.geojson`, `risk.json`, and mock report records | Prototype map and UI data | Generated or demo data. The three sample reports are **demo data**, not measured community reports, and must be labelled as such or removed for a final submission. |
-
-## Proposal-number rule
-
-Only measured numbers may appear in the proposal. The following are measured only where the source and test split are stated above. Rule-based risk weights, thresholds, expected impact, coverage, future performance, sample counts, and deployment claims are assumptions unless the team supplies a reproducible measurement; label them explicitly as **assumptions**. Any screenshots, sample reports or seeded records must be labelled **demo data**.
-
-## Rights checklist before registration
-
-1. Ask the lecturer to confirm whether SDP's ownership terms and the hackathon terms permit the proposed registration.
-2. Confirm the AGPL-3.0 implications of Ultralytics YOLO for the intended submission and deployment.
-3. Obtain and record the exact licences/attributions for both Mendeley datasets and the two trained weight files.
-4. Review the resolved frontend and Python dependency licences, including transitive dependencies.
-5. Confirm consent and retention rules for team photos and any future citizen reports.
